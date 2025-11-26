@@ -29,6 +29,10 @@ jobs:
       - name: Install Dependencies
         run: |
           uv sync --all-extras --dev
+      # --- NUOVO STEP: AUDIT DI SICUREZZA ---
+      - name: Run Security Audit (pip-audit)
+        # Verifica se le dipendenze hanno vulnerabilità di sicurezza note (CVE)
+        run: uv run pip-audit
 
       # Controllo Qualità Codice (Linting & Formatting)
       - name: Run Ruff (Lint & Format Check)
