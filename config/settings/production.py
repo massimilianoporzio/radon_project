@@ -1,6 +1,6 @@
 import os
 
-from .base import *
+from .base import *  # noqa
 
 DEBUG = False
 
@@ -8,7 +8,6 @@ DEBUG = False
 ALLOWED_HOSTS = ["192.168.1.100", "localhost", "127.0.0.1"]
 
 # Sicurezza base
-SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
 
 # Log su file per Waitress/Windows

@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
     # Nota: AbstractUser ha già first_name, last_name, email.
     # Li sovrascriviamo solo se vuoi cambiare opzioni (es. email unique=True che è ottima cosa).
 
-    gender = models.CharField(max_length=1, blank=True, null=True, choices=GENDER_CHOICES, default=MALE)
+    gender = models.CharField(max_length=1, blank=True, choices=GENDER_CHOICES, default=MALE)
 
     # Rendiamo l'email obbligatoria e unica (best practice moderna)
     email = models.EmailField(

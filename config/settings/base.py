@@ -12,9 +12,21 @@ env = environ.Env()
 # Legge il file .env nella root del progetto (se esiste)
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# --- SICUREZZA ---
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="chiave-non-sicura-temporanea")
 DEBUG = env.bool("DJANGO_DEBUG", False)
+
+# --- SICUREZZA ---
+if DEBUG:
+    # In SVILUPPO (Locale):
+    # Se manca la chiave nel .env, ne usiamo una finta per comodità.
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-dev-key-do-not-use-in-prod")
+else:
+    # In PRODUZIONE (Online):
+    # NON mettiamo nessun default.
+    # Se la variabile manca nel file .env o nelle config del server,
+    # django-environ solleverà un errore "ImproperlyConfigured" e il server non partirà.
+    # Questo ti salva da disastri di sicurezza.
+    SECRET_KEY = env("DJANGO_SECRET_KEY")
+
 ALLOWED_HOSTS = []
 
 # --- APPLICAZIONI ---
@@ -73,7 +85,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # --- DATABASE (PostGIS) ---
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgis://django_radon_user:LaTuaPasswordSegreta@localhost:5432/radon_db")
+    "default": env.db(
+        "DATABASE_URL",
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    )
 }
 
 # --- CUSTOM USER MODEL ---

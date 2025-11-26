@@ -1,14 +1,21 @@
+import logging  # <--- 1. Aggiungi questo import
 import os
 import sys
 from pathlib import Path
 
-from .base import *
+from .base import *  # noqa
 
+# <--- 2. Inizializza il logger
+logger = logging.getLogger(__name__)
 # --- SVILUPPO ---
 DEBUG = True
 
 # In sviluppo accettiamo tutto per comodità
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]", "*"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+]
 
 # --- LOGGING SU CONSOLE ---
 # Vediamo tutto colorato nel terminale
@@ -74,4 +81,4 @@ if os.name == "nt":
                 GEOS_LIBRARY_PATH = str(geos_dlls[0])
 
     else:
-        print(f"ATTENZIONE: Cartella osgeo non trovata in {OSGEO_ROOT}. Hai installato il wheel GDAL?")
+        logger.warning("ATTENZIONE: Cartella osgeo non trovata in %s. Hai installato il wheel GDAL?", OSGEO_ROOT)
