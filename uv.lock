@@ -248,14 +248,8 @@ wheels = [
 [[package]]
 name = "gdal"
 version = "3.11.4"
-source = { path = "gdal-3.11.4-cp312-cp312-win_amd64.whl" }
-wheels = [
-    { filename = "gdal-3.11.4-cp312-cp312-win_amd64.whl", hash = "sha256:6832fa5f5158b595333b8b2630782ba33f8028315acee3a3e726ccd07c337c57" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "numpy", marker = "extra == 'numpy'", specifier = ">1.0.0" }]
-provides-extras = ["numpy"]
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/e0/1840d476bfd2d1e8c22dacb612027a16ad1dfba60d5d4379bdaaf6a1545f/gdal-3.11.4.tar.gz", hash = "sha256:c28cd5ffda3df98555e21083d922762b0a095d8f10292e2ec60ee0d55651d74a", size = 878351, upload-time = "2025-09-11T09:28:00.097Z" }
 
 [[package]]
 name = "identify"
@@ -645,7 +639,7 @@ requires-dist = [
     { name = "django-environ", specifier = ">=0.12.0" },
     { name = "django-filter", specifier = ">=25.2" },
     { name = "djangorestframework", specifier = ">=3.16.1" },
-    { name = "gdal", path = "gdal-3.11.4-cp312-cp312-win_amd64.whl" },
+    { name = "gdal", specifier = ">=3.4" },
     { name = "markdown", specifier = ">=3.10" },
     { name = "psycopg", specifier = ">=3.2.13" },
     { name = "waitress", specifier = ">=3.0.2" },

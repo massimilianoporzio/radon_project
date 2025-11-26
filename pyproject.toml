@@ -14,7 +14,7 @@ dependencies = [
     "psycopg>=3.2.13",
     "waitress>=3.0.2",
     "whitenoise>=6.11.0",
-    "GDAL @ file:///E:/progetti/radon_project/gdal-3.11.4-cp312-cp312-win_amd64.whl",
+    "gdal>=3.4"
 ]
 
 [dependency-groups]
