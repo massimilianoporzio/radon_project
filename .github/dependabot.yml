@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Aggiorna le dipendenze Python/UV (pyproject.toml)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly" # Controlla gli aggiornamenti ogni settimana
+
+  # Aggiorna le dipendenze GitHub Actions (se ne aggiungerai)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

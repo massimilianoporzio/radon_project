@@ -1,0 +1,47 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.12]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Installa uv (molto più veloce di pip)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      # Configura Python usando uv
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # Installa le dipendenze (inclusi i dev tools come ruff)
+      - name: Install Dependencies
+        run: |
+          uv sync --all-extras --dev
+
+      # Controllo Qualità Codice (Linting & Formatting)
+      - name: Run Ruff (Lint & Format Check)
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      # Esegui i Test (Opzionale per ora, ma pronto per il futuro)
+      - name: Run Tests
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.local
+          DJANGO_SECRET_KEY: "test-key-ci"
+          # Usa SQLite per i test CI perché è veloce e non richiede setup
+          DATABASE_URL: "sqlite:///db.sqlite3"
+        run: |
+          uv run pytest

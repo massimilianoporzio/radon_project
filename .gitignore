@@ -26,3 +26,17 @@ media/
 .idea/
 .DS_Store
 Thumbs.db
+
+
+
+#Ignora i file di installazione binari di GDAL
+
+*.whl
+*.dll
+*.exe
+
+#Ignora i dump del database (CRITICO!)
+
+*.sql
+*.backup
+*.dump
