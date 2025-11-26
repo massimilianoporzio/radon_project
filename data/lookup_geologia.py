@@ -39,7 +39,7 @@ def generate_sql_insert(data):
     """
     sql_header = f"""
 -- FILE GENERATO AUTOMATICAMENTE DA mappa_geologia.py
--- Data: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+-- Data: {__import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 -- Contiene {len(data)} valori unici estratti dal DB.
 
 -- ATTENZIONE: La mappatura 'Medio/Sconosciuto' NECESSITA DI VERIFICA MANUALE.
