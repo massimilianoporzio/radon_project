@@ -10,11 +10,12 @@ dependencies = [
     "django-environ>=0.12.0",
     "django-filter>=25.2",
     "djangorestframework>=3.16.1",
+    "gdal>=3.12.0.post1 ; sys_platform == 'nt'",
+    "gdal ; sys_platform == 'win32'",
     "markdown>=3.10",
     "psycopg>=3.2.13",
     "waitress>=3.0.2",
     "whitenoise>=6.11.0",
-    "gdal>=3.4"
 ]
 
 [dependency-groups]
@@ -76,3 +77,6 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.uv.sources]
+gdal = { path = "gdal-3.11.4-cp312-cp312-win_amd64.whl" }
