@@ -78,4 +78,4 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.uv.sources]
-gdal = { path = "gdal-3.11.4-cp312-cp312-win_amd64.whl", marker = "sys_platform == 'win32'" }
+gdal = { url = "https://github.com/massimilianoporzio/radon_project/releases/download/libs-v1/gdal-3.11.4-cp312-cp312-win_amd64.whl", marker = "sys_platform == 'win32'" }
