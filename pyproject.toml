@@ -1,0 +1,23 @@
+[project]
+name = "radon-monitor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2.8",
+    "django-environ>=0.12.0",
+    "django-filter>=25.2",
+    "djangorestframework>=3.16.1",
+    "markdown>=3.10",
+    "psycopg>=3.2.13",
+    "waitress>=3.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "colorlog>=6.10.1",
+    "pre-commit>=4.5.0",
+    "pytest-django>=4.11.1",
+    "ruff>=0.14.6",
+]
