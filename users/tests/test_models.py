@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 
 # Recuperiamo il modello utente attivo (il tuo CustomUser)
 User = get_user_model()
@@ -29,5 +30,5 @@ def test_email_unique():
     """Verifica che non si possano creare due utenti con la stessa email."""
     User.objects.create_user(username="user1", email="unique@test.com", password="pwd")
 
-    with pytest.raises(Exception):  # Django lancerà un errore di integrità
+    with pytest.raises(IntegrityError):  # Django lancerà un errore di integrità
         User.objects.create_user(username="user2", email="unique@test.com", password="pwd")
