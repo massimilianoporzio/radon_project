@@ -70,9 +70,7 @@ jobs:
           # Stringa di connessione al servizio: postgresql://USER:PASSWORD@HOST:PORT/DBNAME
           DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_test_db
         run: |
-          # 1. Attendiamo che il DB sia pronto
-          sleep 10
-          # 2. Eseguiamo le migrazioni (Crea le estensioni PostGIS nel DB di test)
+          # 1. Eseguiamo le migrazioni (Crea le estensioni PostGIS nel DB di test)
           uv run python manage.py migrate --noinput
-          # 3. Lanciamo i test
+          # 2. Lanciamo i test
           uv run pytest
