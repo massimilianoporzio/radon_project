@@ -14,9 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # TRAPPOLA: Chi va su /admin trova il finto login
+    path("admin/", include("admin_honeypot.urls", namespace="admin_honeypot")),
+    # VERO ADMIN: Tu userai questo indirizzo segreto
+    # Puoi cambiarlo in quello che vuoi (es. 'gestione/', 'controllo/', 'super-secret/')
+    path("secret-admin/", admin.site.urls),
 ]

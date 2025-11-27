@@ -1,0 +1,76 @@
+name: Django CI (PostGIS Ready)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  # Queste variabili valgono per tutti gli step
+  DJANGO_SECRET_KEY: "chiave-finta-per-la-ci-non-usare-in-produzione"
+  DJANGO_DEBUG: "False"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # --- 1. DEFINIZIONE DEL SERVIZIO POSTGRES/POSTGIS ---
+    # Avvia un container Docker con PostGIS accanto al runner.
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3 # Immagine stabile con PostGIS
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: ci_test_db
+        ports:
+          - 5432:5432 # Espone la porta
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install
+
+      # --- 2. INSTALLAZIONE LIBRERIE GIS DI SISTEMA ---
+      # Queste sono necessarie perché il runner non le ha di default (GDAL, GEOS, PROJ)
+      - name: Install System Dependencies (GDAL/GEOS/PROJ)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev libgeos-dev
+
+      - name: Install Python Dependencies
+        # uv sync installerà anche psycopg per connettersi al container
+        run: uv sync --all-extras --dev
+
+      # --- 3. AUDIT DI SICUREZZA ---
+      - name: Run Security Audit (pip-audit)
+        run: uv run pip-audit
+
+      - name: Run Ruff (Linting)
+        run: uv run ruff check .
+
+      - name: Run Ruff (Formatting Check)
+        run: uv run ruff format --check .
+
+      # --- 4. ESECUZIONE TEST SU POSTGIS ---
+      - name: Run GIS Tests on PostGIS Service
+        # Variabili d'ambiente per connettersi al container
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.local
+          # Stringa di connessione al servizio: postgresql://USER:PASSWORD@HOST:PORT/DBNAME
+          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_test_db
+        run: |
+          # 1. Eseguiamo le migrazioni (Crea le estensioni PostGIS nel DB di test)
+          uv run python manage.py migrate --noinput
+          # 2. Lanciamo i test
+          uv run pytest

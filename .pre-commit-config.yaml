@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.14.6
+    hooks:
+      # Esegui il linter (cerca errori)
+      - id: ruff
+        args: [--fix]
+      # Esegui il formatter (come Black, ma più veloce)
+      - id: ruff-format
