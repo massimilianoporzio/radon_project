@@ -47,6 +47,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "users",  # La tua app utenti (CustomUser)
+    "territorio",  # La tua app territorio (ComuneArpa)
     # 'core',  # Scommenta quando creeremo l'app core
 ]
 
