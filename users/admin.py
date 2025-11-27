@@ -2,8 +2,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User  # Assicurati che il modello si chiami User
+from .models import CustomUser  # Assicurati che il modello si chiami CustomUser
 
-# Registriamo il tuo User custom usando la logica standard di Django
-# (così vedi i campi password, permessi, gruppi, ecc. formattati bene)
-admin.site.register(User, UserAdmin)
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    # UserAdmin gestisce già password hashata, gruppi, permessi, ecc.
+    # Se hai campi custom (es. 'telefono'), dovrai aggiungerli ai fieldsets qui sotto.
+    pass
