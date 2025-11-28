@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 
 import environ
-from django.templatetags.static import static
-from django.urls import reverse_lazy
 
 # --- PERCORSI ---
 # Risaliamo di 3 livelli: config/settings/base.py -> config/settings -> config -> ROOT
@@ -30,20 +28,18 @@ else:
     SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = []
-
+from django.urls import reverse_lazy  # noqa: E402, I001
 # --- APPLICAZIONI ---
 
-# config/settings/base.py
+# --- DJANGO UNFOLD CONFIGURATION ---
 
 UNFOLD = {
     # --- 1. BRANDING E TITOLI ---
     "SITE_TITLE": "Monitoraggio Radon ASL",
     "SITE_HEADER": "Sistema GIS Radon",
     "SITE_SYMBOL": "public",
-    # "THEME": "light", # Forza il tema scuro
     "STYLES": [
-        # La lambda passa "request" e usa static per generare l'URL corretto
-        lambda request: static("css/custom_admin.css"),
+        "css/custom_admin.css",  # Esempio: non serve la lambda, basta la stringa
     ],
     # --- 2. CONFIGURAZIONE SIDEBAR ---
     "SIDEBAR": {

@@ -19,8 +19,8 @@ body,
  * CONFIGURAZIONE DARK MODE
  ******************************************/
 /* Questa regola si attiva SOLO quando è attiva la Dark Mode */
-.dark html,
-.dark body,
+html.dark,
+body.dark,
 .dark #main {
   background-image: none !important;
 
