@@ -197,6 +197,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d7/4b/6e6baf12ecfd59a8410e42e41062c38f69287c3d21c91ca5784f725a3dd7/django-admin-honeypot-updated-2021-1.2.0.tar.gz", hash = "sha256:ab256a7cfe445db4694ff70b065d7e9bbf641a2c2b892ae1c9c4f88e187278ca", size = 13783, upload-time = "2021-11-26T08:01:18.966Z" }
 
 [[package]]
+name = "django-concurrency"
+version = "2.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/b7/34f3f007ba189497bebb48eb543572f00cfdd40b86061baf8ca649a978d0/django_concurrency-2.7.tar.gz", hash = "sha256:90b7091039920e759a6b6feb1d481d918f3d6105bd1e2bff09ab781c2734cff3", size = 20701, upload-time = "2025-04-03T17:27:19.496Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/e9/7a332cef95a91598674994a6fda02ef88eee7d903af364444f15ddeab660/django_concurrency-2.7-py3-none-any.whl", hash = "sha256:3dfc1e7d1db436d578faf782c0027fac8296d34c175230ebcf91086c380ade88", size = 28017, upload-time = "2025-04-03T17:27:18.168Z" },
+]
+
+[[package]]
 name = "django-environ"
 version = "0.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -230,6 +239,38 @@ wheels = [
 ]
 
 [[package]]
+name = "django-location-field"
+version = "2.7.3"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/c3/37c545104c47d97331392a81f3765a2820cf69a0e3b362b2f4fdf250adc1/django_location_field-2.7.3-py2.py3-none-any.whl", hash = "sha256:b0660d3fd024541fbe53ef723e3b02ec4014fbc886ee3d8342e031f1ab28d11d", size = 920952, upload-time = "2023-11-21T14:20:59.132Z" },
+]
+
+[[package]]
+name = "django-simple-history"
+version = "3.10.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/16/2b/8d43eed1f9de32e890e0f5780e6d623a5a7e645e0e77a515edd427029f3c/django_simple_history-3.10.1.tar.gz", hash = "sha256:040f0c2286bed730312aa15f0acee9e7e6f839c4bcd721693251aa7ec5b65d95", size = 233649, upload-time = "2025-06-20T20:22:32.722Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/c3/d4ba265feb7b8bad3cf0730a3a8d82bb40d14551f8c53c88895ec06fa51c/django_simple_history-3.10.1-py3-none-any.whl", hash = "sha256:e12c27abfcd7e801a9d274d94542549ce8c617b0b384ae69afb161b56cd02ba4", size = 78611, upload-time = "2025-06-20T20:22:30.878Z" },
+]
+
+[[package]]
+name = "django-unfold"
+version = "0.72.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/55/e6/045b68207d8b4b395623d39d803e6566ea2c110e56665e3ff6bda07de6aa/django_unfold-0.72.0.tar.gz", hash = "sha256:43a0e8a4383037a24b73666c9f721faef12bd500c4628b4fc39d0dafd2e9c0a2", size = 1102339, upload-time = "2025-11-24T09:03:47.347Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/dd/6cdb80d5d377f2bdf3b39b639025bb8655b96fac08aa3673ae1e4b3e3384/django_unfold-0.72.0-py3-none-any.whl", hash = "sha256:61448ad42ff7a33c7ad66d14071b24224bb476038a14a1bbe719a774db496e34", size = 1215396, upload-time = "2025-11-24T09:03:45.568Z" },
+]
+
+[[package]]
 name = "djangorestframework"
 version = "3.16.1"
 source = { registry = "https://pypi.org/simple" }
@@ -239,6 +280,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8a/95/5376fe618646fde6899b3cdc85fd959716bb67542e273a76a80d9f326f27/djangorestframework-3.16.1.tar.gz", hash = "sha256:166809528b1aced0a17dc66c24492af18049f2c9420dbd0be29422029cfc3ff7", size = 1089735, upload-time = "2025-08-06T17:50:53.251Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b0/ce/bf8b9d3f415be4ac5588545b5fcdbbb841977db1c1d923f7568eeabe1689/djangorestframework-3.16.1-py3-none-any.whl", hash = "sha256:33a59f47fb9c85ede792cbf88bde71893bcda0667bc573f784649521f1102cec", size = 1080442, upload-time = "2025-08-06T17:50:50.667Z" },
+]
+
+[[package]]
+name = "drf-yasg"
+version = "1.21.11"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "djangorestframework" },
+    { name = "inflection" },
+    { name = "packaging" },
+    { name = "pytz" },
+    { name = "pyyaml" },
+    { name = "uritemplate" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5f/19/8aa1eac9a67aaa09ff9761c6aec7878fb6d7bdbac59a9398c3dda2cd9d9d/drf_yasg-1.21.11.tar.gz", hash = "sha256:0190b3de884aa593a39c75e6daba2ae69f285f0691de1eb0e3f4c6307faa1817", size = 4599786, upload-time = "2025-09-26T22:18:27.333Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/ea/c94362b34f3d81ac2cf5e3e955773f7d6c3813866bdc3869480c230827b7/drf_yasg-1.21.11-py3-none-any.whl", hash = "sha256:ec741f313b3b5f0b5fc8c1e1b6ed323c34f1f492a41fe7cc7421d8c6de9753e4", size = 4291885, upload-time = "2025-09-26T22:18:25.506Z" },
 ]
 
 [[package]]
@@ -278,6 +337,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz", hash = "sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902", size = 194582, upload-time = "2025-10-12T14:55:20.501Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0e/61/66938bbb5fc52dbdf84594873d5b51fb1f7c7794e9c0f5bd885f30bc507b/idna-3.11-py3-none-any.whl", hash = "sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea", size = 71008, upload-time = "2025-10-12T14:55:18.883Z" },
+]
+
+[[package]]
+name = "inflection"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/7e/691d061b7329bc8d54edbf0ec22fbfb2afe61facb681f9aaa9bff7a27d04/inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417", size = 15091, upload-time = "2020-08-22T08:16:29.139Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/91/aa6bde563e0085a02a435aa99b49ef75b0a4b062635e606dab23ce18d720/inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2", size = 9454, upload-time = "2020-08-22T08:16:27.816Z" },
 ]
 
 [[package]]
@@ -571,6 +639,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2025.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3", size = 320884, upload-time = "2025-03-25T02:25:00.538Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00", size = 509225, upload-time = "2025-03-25T02:24:58.468Z" },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -623,9 +700,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "django" },
     { name = "django-admin-honeypot-updated-2021" },
+    { name = "django-concurrency" },
     { name = "django-environ" },
     { name = "django-filter" },
+    { name = "django-location-field" },
+    { name = "django-simple-history" },
+    { name = "django-unfold" },
     { name = "djangorestframework" },
+    { name = "drf-yasg" },
     { name = "gdal", marker = "sys_platform == 'win32'" },
     { name = "markdown" },
     { name = "psycopg" },
@@ -647,9 +729,14 @@ dev = [
 requires-dist = [
     { name = "django", specifier = ">=5.2.8" },
     { name = "django-admin-honeypot-updated-2021", specifier = ">=1.2.0" },
+    { name = "django-concurrency", specifier = ">=2.7" },
     { name = "django-environ", specifier = ">=0.12.0" },
     { name = "django-filter", specifier = ">=25.2" },
+    { name = "django-location-field", specifier = ">=2.7.3" },
+    { name = "django-simple-history", specifier = ">=3.10.1" },
+    { name = "django-unfold", specifier = ">=0.72.0" },
     { name = "djangorestframework", specifier = ">=3.16.1" },
+    { name = "drf-yasg", specifier = ">=1.21.11" },
     { name = "gdal", marker = "sys_platform == 'win32'", url = "https://github.com/massimilianoporzio/radon_project/releases/download/libs-v1/gdal-3.11.4-cp312-cp312-win_amd64.whl" },
     { name = "markdown", specifier = ">=3.10" },
     { name = "psycopg", specifier = ">=3.2.13" },
@@ -764,6 +851,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/95/32/1a225d6164441be760d75c2c42e2780dc0873fe382da3e98a2e1e48361e5/tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9", size = 196380, upload-time = "2025-03-23T13:54:43.652Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5c/23/c7abc0ca0a1526a0774eca151daeb8de62ec457e77262b66b359c3c7679e/tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8", size = 347839, upload-time = "2025-03-23T13:54:41.845Z" },
+]
+
+[[package]]
+name = "uritemplate"
+version = "4.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/60/f174043244c5306c9988380d2cb10009f91563fc4b31293d27e17201af56/uritemplate-4.2.0.tar.gz", hash = "sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e", size = 33267, upload-time = "2025-06-02T15:12:06.318Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/99/3ae339466c9183ea5b8ae87b34c0b897eda475d2aec2307cae60e5cd4f29/uritemplate-4.2.0-py3-none-any.whl", hash = "sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686", size = 11488, upload-time = "2025-06-02T15:12:03.405Z" },
 ]
 
 [[package]]

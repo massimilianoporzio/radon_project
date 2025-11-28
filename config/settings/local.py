@@ -7,17 +7,6 @@ from .base import *  # noqa
 
 # <--- 2. Inizializza il logger
 logger = logging.getLogger(__name__)
-# --- SVILUPPO ---
-DEBUG = True
-
-# In sviluppo accettiamo tutto per comodità
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "[::1]",
-]
-
-# --- LOGGING SU CONSOLE ---
 # Vediamo tutto colorato nel terminale
 LOGGING = {
     "version": 1,
@@ -44,6 +33,19 @@ LOGGING = {
         # 'django.db.backends': {'handlers': ['console'], 'level': 'DEBUG'},
     },
 }
+
+# --- SVILUPPO ---
+DEBUG = True
+
+# In sviluppo accettiamo tutto per comodità
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+]
+
+# --- LOGGING SU CONSOLE ---
+
 
 # ==========================================
 # FIX CRITICO PER GDAL SU WINDOWS (UV/PIP)
