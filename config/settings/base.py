@@ -98,13 +98,15 @@ UNFOLD = {
                         "title": "Cronologia Modifiche",
                         "icon": "history",
                         # FIX: Punti all'indice Admin finché non c'è il primo modello tracciato
-                        "link": reverse_lazy("admin:index"),
-                        "permission": lambda request: request.user.is_superuser,
-                    },
-                ],
-            },
-        ],
-    },
+                        # {
+                        #     "title": "Cronologia Modifiche",
+                        #     "icon": "history",
+                        #     # FIX: Punti all'indice Admin finché non c'è il primo modello tracciato
+                        #     # Temporaneamente disabilitato per evitare confusione. Sarà riattivato
+                        #     # quando esisterà una vista globale della cronologia.
+                        #     "link": reverse_lazy("admin:index"),
+                        #     "permission": lambda request: request.user.is_superuser,
+                        # },
     # --- 3. ALTRE IMPOSTAZIONI (Opzionali) ---
     "COLORS": {
         "base": {
