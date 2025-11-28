@@ -1,0 +1,30 @@
+/* static/css/custom_admin.css */
+
+/******************************************
+ * CONFIGURAZIONE GENERALE (LIGHT MODE)
+ ******************************************/
+html,
+body,
+#main {
+  /* Rimuove pattern e immagini di sfondo */
+  background-image: none !important;
+
+  /* Colore per la modalità Chiara (Light Mode) */
+  /* Usa #ffffff per bianco puro o #f9fafb per un grigio chiarissimo (standard Tailwind) */
+  background-color: #f9fafb !important;
+  color: #111827; /* Testo scuro per leggibilità */
+}
+
+/******************************************
+ * CONFIGURAZIONE DARK MODE
+ ******************************************/
+/* Questa regola si attiva SOLO quando è attiva la Dark Mode */
+.dark html,
+.dark body,
+.dark #main {
+  background-image: none !important;
+
+  /* Colore per la modalità Scura (Dark Mode) - Quello che ti piaceva */
+  background-color: #111827 !important;
+  color: #ffffff; /* Testo bianco */
+}

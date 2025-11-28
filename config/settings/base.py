@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 import environ
+from django.templatetags.static import static
+from django.urls import reverse_lazy
 
 # --- PERCORSI ---
 # Risaliamo di 3 livelli: config/settings/base.py -> config/settings -> config -> ROOT
@@ -30,6 +32,124 @@ else:
 ALLOWED_HOSTS = []
 
 # --- APPLICAZIONI ---
+
+# config/settings/base.py
+
+UNFOLD = {
+    # --- 1. BRANDING E TITOLI ---
+    "SITE_TITLE": "Monitoraggio Radon ASL",
+    "SITE_HEADER": "Sistema GIS Radon",
+    "SITE_SYMBOL": "public",
+    # "THEME": "light", # Forza il tema scuro
+    "STYLES": [
+        # La lambda passa "request" e usa static per generare l'URL corretto
+        lambda request: static("css/custom_admin.css"),
+    ],
+    # --- 2. CONFIGURAZIONE SIDEBAR ---
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,  # Mostra solo i gruppi definiti qui
+        "navigation": [
+            # GRUPPO 1: DATI CORE GIS/AMMINISTRATIVI
+            {
+                "title": "Dati Geografici & Amministrativi",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Comuni ARPA",
+                        "icon": "globe",
+                        "link": reverse_lazy("admin:territorio_comunearpa_changelist"),
+                        # Chiunque abbia il permesso di vedere i Comuni ARPA
+                        "permission": lambda request: request.user.has_perm("territorio.view_comunearpa"),
+                    },
+                    # Futuro: Edifici e Piani (useranno permessi custom)
+                ],
+            },
+            # GRUPPO 2: ACCESSO E SICUREZZA
+            {
+                "title": "Accesso & Utenti",
+                "separator": True,
+                "items": [
+                    # ✔️ Utenti Custom (Visibile agli staff/superusers)
+                    {
+                        "title": "Utenti",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_customuser_changelist"),
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                    # ✔️ Gruppi e Permessi (SOLO Superuser)
+                    {
+                        "title": "Gruppi & Permessi",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    # ✔️ Honeypot (SOLO Superuser per la sicurezza)
+                    {
+                        "title": "Log Tentativi",
+                        "icon": "shield",
+                        "link": reverse_lazy("admin:admin_honeypot_loginattempt_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+            # GRUPPO 3: ARCHITETTURA E LOG (Manutenzione del Sistema)
+            {
+                "title": "Gestione Tecnica & Log",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Cronologia Modifiche",
+                        "icon": "history",
+                        # FIX: Punti all'indice Admin finché non c'è il primo modello tracciato
+                        "link": reverse_lazy("admin:index"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+        ],
+    },
+    # --- 3. ALTRE IMPOSTAZIONI (Opzionali) ---
+    "COLORS": {
+        "base": {
+            "50": "oklch(98.5% .002 247.839)",
+            "100": "oklch(96.7% .003 264.542)",
+            "200": "oklch(92.8% .006 264.531)",
+            "300": "oklch(87.2% .01 258.338)",
+            "400": "oklch(70.7% .022 261.325)",
+            "500": "oklch(55.1% .027 264.364)",
+            "600": "oklch(44.6% .03 256.802)",
+            "700": "oklch(37.3% .034 259.733)",
+            "800": "oklch(27.8% .033 256.848)",
+            "900": "oklch(21% .034 264.665)",
+            "950": "oklch(13% .028 261.692)",
+        },
+        "primary": {
+            # Cambia l'ultimo valore (il Tono) da 308/307 a 170 circa.
+            "50": "#e7fff8",  # Era 308.299
+            "100": "#c6ffec",  # Era 307.174
+            "200": "#92ffdf",  # Era 306.703
+            "300": "#4dffd2",  # Era 306.383
+            "400": "#0fffc3",  # Era 305.504
+            "500": "#00e8ac",  # Era 303.9 - Questo è il colore principale!
+            "600": "#00be8e",  # Era 302.321
+            "700": "#009876",  # Era 301.924
+            "800": "#00785f",  # Era 303.724
+            "900": "#00624f",  # Era 304.987
+            "950": "#00382e",  # Era 302.717
+        },
+    },
+}
+# 1. UI APPS (Ordine Garantito)
+UI_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
+    "unfold.contrib.inlines",
+    "unfold.contrib.location_field",
+    "unfold.contrib.simple_history",
+]
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,21 +157,27 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",  # GeoDjango (PostGIS)
+    "django.contrib.gis",
 ]
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "admin_honeypot",
+    # ⚠️ TORNIAMO AL NOME COMPLETO PERCHÉ È NECESSARIO
+    "location_field.apps.DefaultConfig",
+    "simple_history",
+    "concurrency",
+    "drf_yasg",
 ]
 
 LOCAL_APPS = [
-    "users",  # La tua app utenti (CustomUser)
-    "territorio",  # La tua app territorio (ComuneArpa)
-    # 'core',  # Scommenta quando creeremo l'app core
+    "users",
+    "territorio",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# La concatenazione finale è corretta:
+INSTALLED_APPS = UI_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -112,6 +238,9 @@ USE_TZ = True
 # --- STATIC FILES ---
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
