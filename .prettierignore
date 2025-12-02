@@ -1,0 +1,2 @@
+# Disabilita il formatting per i template Django
+**/*.html

@@ -28,8 +28,23 @@ else:
     SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = []
+# --- UI CONFIG (Import from dedicated file) ---
+from .unfold_config import UNFOLD  # <--- NUOVO IMPORT!  # noqa: E402, F401, I001
 
 # --- APPLICAZIONI ---
+
+# --- DJANGO UNFOLD CONFIGURATION ---
+# La configurazione UNFOLD è centralizzata in `config/settings/unfold_config.py`.
+# 1. UI APPS (Ordine Garantito)
+UI_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
+    "unfold.contrib.inlines",
+    "unfold.contrib.location_field",
+    "unfold.contrib.simple_history",
+]
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,29 +52,37 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",  # GeoDjango (PostGIS)
+    "django.contrib.gis",
 ]
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "admin_honeypot",
+    # ⚠️ TORNIAMO AL NOME COMPLETO PERCHÉ È NECESSARIO
+    "location_field.apps.DefaultConfig",
+    "simple_history",
+    "concurrency",
+    "drf_yasg",
 ]
 
 LOCAL_APPS = [
-    "users",  # La tua app utenti (CustomUser)
-    "territorio",  # La tua app territorio (ComuneArpa)
-    # 'core',  # Scommenta quando creeremo l'app core
+    "users",
+    "territorio",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# La concatenazione finale è corretta:
+INSTALLED_APPS = UI_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -104,14 +127,23 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # --- INTERNATIONALIZATION ---
-LANGUAGE_CODE = "it-it"
+LANGUAGE_CODE = "it"
 TIME_ZONE = "Europe/Rome"
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+
+# Diciamo a Django dove salvare le traduzioni
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 # --- STATIC FILES ---
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import ComuneArpa
 
 
 @admin.register(ComuneArpa)
-class ComuneArpaAdmin(admin.ModelAdmin):
+class ComuneArpaAdmin(ModelAdmin):
     # Colonne che vedrai nella lista
     list_display = ("nome", "codice_istat", "provincia")
 
