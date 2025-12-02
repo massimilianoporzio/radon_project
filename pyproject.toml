@@ -25,6 +25,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "colorlog>=6.10.1",
+    "moviepy>=2.2.1",
     "pip-audit>=2.9.0",
     "pre-commit>=4.5.0",
     "pytest>=9.0.1",
