@@ -18,7 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from territorio import views as territorio_views
+
 urlpatterns = [
+    # API per mappa comuni (richiede login)
+    path("api/comuni-geojson/", territorio_views.comuni_geojson, name="comuni_geojson"),
     # TRAPPOLA: Chi va su /admin trova il finto login
     path("admin/", include("admin_honeypot.urls", namespace="admin_honeypot")),
     # VERO ADMIN: Tu userai questo indirizzo segreto

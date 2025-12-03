@@ -79,6 +79,17 @@ if os.name == "nt":
             # Prende il primo file gdalXXX.dll valido
             GDAL_LIBRARY_PATH = str(gdal_dlls[0])
 
+        # 2b. Configura PROJ_LIB per evitare conflitti con PostgreSQL
+        # Cerca la cartella proj_data nel virtual environment
+        proj_data_dir = OSGEO_ROOT / "data" / "proj"
+        if proj_data_dir.exists():
+            os.environ["PROJ_LIB"] = str(proj_data_dir)
+        else:
+            # Prova percorso alternativo
+            proj_data_dir = VENV_ROOT / "Lib" / "site-packages" / "pyproj" / "proj_dir" / "share" / "proj"
+            if proj_data_dir.exists():
+                os.environ["PROJ_LIB"] = str(proj_data_dir)
+
         # 3. Configura GEOS (CRITICO: Deve essere geos_c.dll)
         # Django richiede l'interfaccia C, non la libreria C++ (geos.dll)
         geos_c_dll = OSGEO_ROOT / "geos_c.dll"

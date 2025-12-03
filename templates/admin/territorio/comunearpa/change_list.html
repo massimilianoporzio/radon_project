@@ -1,0 +1,326 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'css/leaflet_unfold_theme.css' %}" />
+<style>
+    /* Stili specifici per la lista */
+    #comuni-map-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Assicura che i filtri Unfold siano sopra la mappa */
+    [data-controller="filters"] {
+        z-index: 1000 !important;
+    }
+
+    /* Loader per la mappa */
+    .map-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 2rem;
+        border-radius: 0.5rem;
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .map-loader {
+        background: rgba(17, 24, 39, 0.9);
+    }
+
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgb(229 231 235);
+        border-top-color: rgb(37 99 235);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mappa dei comuni sopra la tabella -->
+<div id="comuni-map-container" style="position: relative;">
+    <div id="comuni-map"></div>
+    <div class="map-loader" id="map-loader">
+        <div class="spinner"></div>
+        <span style="color: rgb(75 85 99);">Caricamento comuni...</span>
+    </div>
+    <!-- Contatore comuni visualizzati -->
+    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000; font-size: 0.875rem; font-weight: 500;">
+        <span id="comuni-counter">Caricamento...</span>
+    </div>
+</div>
+
+<!-- Tabella normale di Unfold -->
+{{ block.super }}
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<script>
+(function() {
+    var map;
+    var comuniLayer;
+    var loader = document.getElementById('map-loader');
+    var allComuniData = null; // Cache dei dati
+    var lastProvinciaFilter = undefined; // Ultimo filtro applicato (undefined = non ancora inizializzato)
+
+    // Inizializza la mappa
+    function initMap() {
+        // Prova a recuperare l'ultima vista della mappa da sessionStorage
+        var savedView = null;
+        try {
+            var savedViewStr = sessionStorage.getItem('map_view_state');
+            if (savedViewStr) {
+                savedView = JSON.parse(savedViewStr);
+            }
+        } catch (e) {
+            console.warn('Impossibile recuperare vista mappa da cache');
+        }
+
+        // Crea mappa con vista salvata o default
+        var center = savedView ? [savedView.lat, savedView.lng] : [45.0, 7.6];
+        var zoom = savedView ? savedView.zoom : 8;
+
+        map = L.map('comuni-map').setView(center, zoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Salva la vista quando la mappa si muove
+        map.on('moveend', function() {
+            var center = map.getCenter();
+            var zoom = map.getZoom();
+            try {
+                sessionStorage.setItem('map_view_state', JSON.stringify({
+                    lat: center.lat,
+                    lng: center.lng,
+                    zoom: zoom
+                }));
+            } catch (e) {
+                // Ignora errori di storage
+            }
+        });
+
+        loadComuni();
+    }
+
+    // Carica TUTTI i comuni con cache persistente in sessionStorage
+    function loadComuni() {
+        // Se abbiamo già i dati in cache memoria, usa quelli
+        if (allComuniData) {
+            filterAndDisplayComuni();
+            return;
+        }
+
+        // Prova a caricare da sessionStorage (persiste tra reload)
+        try {
+            var cachedData = sessionStorage.getItem('comuni_geojson_cache');
+            if (cachedData) {
+                console.log('Caricamento da cache sessionStorage');
+                allComuniData = JSON.parse(cachedData);
+                filterAndDisplayComuni();
+                return;
+            }
+        } catch (e) {
+            console.warn('Cache sessionStorage non disponibile:', e);
+        }
+
+        // Mostra loader solo se non c'è cache
+        loader.style.display = 'flex';
+        loader.querySelector('span').textContent = 'Caricamento comuni semplificati...';
+
+        // Carica tutti i comuni con semplificazione 0.001 (~100m)
+        fetch('/api/comuni-geojson/?simplify=0.001')
+            .then(response => response.json())
+            .then(data => {
+                // Salva in cache memoria
+                allComuniData = data;
+
+                // Prova a salvare anche in sessionStorage (se non troppo grande)
+                try {
+                    var jsonString = JSON.stringify(data);
+                    sessionStorage.setItem('comuni_geojson_cache', jsonString);
+                    console.log('Salvato in cache sessionStorage (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
+                } catch (e) {
+                    console.warn('Impossibile salvare in sessionStorage (troppo grande?):', e);
+                    // Non è un errore critico, funziona comunque con cache memoria
+                }
+
+                console.log('Caricati ' + data.features.length + ' comuni dal server');
+
+                // Mostra con eventuale filtro
+                filterAndDisplayComuni();
+
+                // Nascondi loader
+                loader.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Errore caricamento comuni:', error);
+                loader.innerHTML = '<span style="color: #dc2626;">Errore caricamento mappa</span>';
+            });
+    }
+
+    // Filtra e visualizza i comuni in base alla provincia selezionata
+    function filterAndDisplayComuni() {
+        // Se non esiste ancora il layer, crealo
+        if (!comuniLayer) {
+            createComuniLayer();
+            return;
+        }
+
+        // Ottieni filtro provincia dalla URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var provinciaFilter = urlParams.get('provincia__exact') ||
+                             urlParams.get('provincia') ||
+                             urlParams.get('provincia__iexact');
+
+        // Normalizza a null se undefined
+        if (provinciaFilter === undefined) provinciaFilter = null;
+
+        // Determina se il filtro è cambiato (zoom solo se diverso dal precedente)
+        // undefined significa "primo caricamento" -> zoom sempre
+        var filterChanged = (lastProvinciaFilter === undefined) || (lastProvinciaFilter !== provinciaFilter);
+
+        console.log('Applicazione filtro - Provincia:', provinciaFilter || 'Tutte', '(ultimo:', lastProvinciaFilter, 'cambiato:', filterChanged + ')');
+
+        var visibleCount = 0;
+        var bounds = L.latLngBounds([]);
+
+        // Mostra/nascondi i layer esistenti senza ricrearli
+        comuniLayer.eachLayer(function(layer) {
+            var props = layer.feature.properties;
+            var shouldShow = !provinciaFilter || props.provincia === provinciaFilter;
+
+            if (shouldShow) {
+                if (!map.hasLayer(layer)) {
+                    layer.addTo(map);
+                }
+                visibleCount++;
+                bounds.extend(layer.getBounds());
+            } else {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            }
+        });
+
+        // Zoom automatico SOLO se il filtro è cambiato
+        if (filterChanged && bounds.isValid()) {
+            map.fitBounds(bounds, {
+                padding: [20, 20],
+                maxZoom: 10
+            });
+        }
+
+        // Aggiorna ultimo filtro applicato
+        lastProvinciaFilter = provinciaFilter;
+
+        // Aggiorna contatore
+        updateCounter(visibleCount);
+        console.log('Mostrati', visibleCount, 'comuni');
+    }
+
+    // Crea il layer con tutti i comuni UNA SOLA VOLTA
+    function createComuniLayer() {
+        comuniLayer = L.geoJSON(allComuniData, {
+            smoothFactor: 2.0,
+            style: function(feature) {
+                return {
+                    fillColor: '#3b82f6',
+                    weight: 1,
+                    opacity: 0.7,
+                    color: '#1e40af',
+                    fillOpacity: 0.25
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                var props = feature.properties;
+                var popupContent =
+                    '<h3>' + props.nome + '</h3>' +
+                    '<p><strong>Provincia:</strong> ' + props.provincia + '</p>' +
+                    '<p><strong>Codice ISTAT:</strong> ' + props.codice_istat + '</p>' +
+                    '<p><a href="/secret-admin/territorio/comunearpa/' + props.codice_istat + '/change/">Visualizza dettagli</a></p>';
+
+                layer.bindPopup(popupContent);
+
+                // Highlight al passaggio del mouse
+                layer.on('mouseover', function(e) {
+                    e.target.setStyle({
+                        fillOpacity: 0.6,
+                        weight: 2
+                    });
+                });
+
+                layer.on('mouseout', function(e) {
+                    e.target.setStyle({
+                        fillOpacity: 0.25,
+                        weight: 1
+                    });
+                });
+            }
+        });
+
+        // Applica il filtro iniziale
+        filterAndDisplayComuni();
+    }
+
+    // Aggiorna contatore comuni visualizzati
+    function updateCounter(count) {
+        var counter = document.getElementById('comuni-counter');
+        if (counter) {
+            counter.textContent = count + ' comuni visualizzati';
+        }
+    }
+
+    // Intercetta i cambiamenti nella URL (quando Unfold applica i filtri)
+    var lastUrl = location.href;
+
+    // Controlla ogni 200ms se l'URL è cambiata (dopo click sui filtri)
+    setInterval(function() {
+        var currentUrl = location.href;
+        if (currentUrl !== lastUrl) {
+            console.log('URL cambiata, riapplico filtro mappa');
+            lastUrl = currentUrl;
+            if (allComuniData) {
+                filterAndDisplayComuni();
+            }
+        }
+    }, 200);
+
+    // Ascolta anche eventi popstate (back/forward del browser)
+    window.addEventListener('popstate', function() {
+        console.log('Popstate event, riapplico filtro mappa');
+        if (allComuniData) {
+            filterAndDisplayComuni();
+        }
+    });
+
+    // Inizializza quando il DOM è pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
+})();
+</script>
+{% endblock %}

@@ -1,7 +1,8 @@
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
-<div id="map-{{ codice_istat }}" style="height: 500px; width: 100%; border-radius: 8px; margin: 10px 0;"></div>
+<link rel="stylesheet" href="{% static 'css/leaflet_unfold_theme.css' %}" />
+<div id="map-{{ codice_istat }}" class="comune-detail-map"></div>
 
 <script src="{% static 'leaflet/leaflet.js' %}"></script>
 <script>

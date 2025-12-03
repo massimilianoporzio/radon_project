@@ -23,6 +23,9 @@ class UnfoldLeafletGeoAdmin(ModelAdmin, LeafletGeoAdmin):
 
 @admin.register(ComuneArpa)
 class ComuneArpaAdmin(UnfoldLeafletGeoAdmin):
+    # Template personalizzato per la lista con mappa
+    change_list_template = "admin/territorio/comunearpa/change_list.html"
+
     # Colonne che vedrai nella lista
     list_display = ("nome", "codice_istat", "provincia")
 
