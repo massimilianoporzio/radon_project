@@ -248,6 +248,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-leaflet"
+version = "0.33.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/71/35/be356129d89c98c8f4884e946abec7f7d21ddcce159bcde4970e754ea3ab/django_leaflet-0.33.0.tar.gz", hash = "sha256:b51c71e7179eed9961484dfd57b87bd1ece3b1ff7bee4dfb7f4d5702206b2eca", size = 562259, upload-time = "2025-12-01T13:00:41.525Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/9b/b323a5ea711961e77e9e362f55ea6d229d75daa6c1eaa37aec3ddaba1017/django_leaflet-0.33.0-py3-none-any.whl", hash = "sha256:bf30526daf7710f9afc35f0221284fe3b0558f3d9f259344ac3b82e23d28ec98", size = 577199, upload-time = "2025-12-01T13:00:39.069Z" },
+]
+
+[[package]]
 name = "django-location-field"
 version = "2.7.3"
 source = { registry = "https://pypi.org/simple" }
@@ -907,6 +919,7 @@ dependencies = [
     { name = "django-concurrency" },
     { name = "django-environ" },
     { name = "django-filter" },
+    { name = "django-leaflet" },
     { name = "django-location-field" },
     { name = "django-simple-history" },
     { name = "django-unfold" },
@@ -937,6 +950,7 @@ requires-dist = [
     { name = "django-concurrency", specifier = ">=2.7" },
     { name = "django-environ", specifier = ">=0.12.0" },
     { name = "django-filter", specifier = ">=25.2" },
+    { name = "django-leaflet", specifier = ">=0.30.1" },
     { name = "django-location-field", specifier = ">=2.7.3" },
     { name = "django-simple-history", specifier = ">=3.10.1" },
     { name = "django-unfold", specifier = ">=0.72.0" },

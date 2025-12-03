@@ -1,0 +1,42 @@
+{% load static %}
+
+<div style="margin: 20px 0;">
+    <div id="map-{{ codice_istat }}" style="height: 500px; width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;"></div>
+</div>
+
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+
+<script>
+(function() {
+    var mapId = 'map-{{ codice_istat }}';
+    var map = L.map(mapId).setView([45.0, 7.6], 8);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var geojsonFeature = {{ geojson|safe }};
+    var layer = L.geoJSON(geojsonFeature, {
+        style: {
+            fillColor: '#3b82f6',
+            weight: 2,
+            opacity: 1,
+            color: '#1e40af',
+            fillOpacity: 0.3
+        }
+    }).addTo(map);
+
+    map.fitBounds(layer.getBounds(), {
+        padding: [50, 50],
+        maxZoom: 12
+    });
+
+    layer.bindPopup(
+        '<h3>{{ nome }}</h3>' +
+        '<p>Provincia: {{ provincia }}</p>' +
+        '<p>Codice ISTAT: {{ codice_istat }}</p>'
+    );
+})();
+</script>
