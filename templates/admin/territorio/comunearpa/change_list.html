@@ -50,6 +50,172 @@
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
+
+    /* Stili popup Leaflet che seguono tema Unfold */
+    .leaflet-popup-content-wrapper {
+        background: white !important;
+        color: #111827 !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    }
+
+    .dark .leaflet-popup-content-wrapper {
+        background: #1f2937 !important;
+        color: #f9fafb !important;
+    }
+
+    .leaflet-popup-tip {
+        background: white !important;
+    }
+
+    .dark .leaflet-popup-tip {
+        background: #1f2937 !important;
+    }
+
+    .custom-popup .popup-wrapper {
+        min-width: 280px;
+        padding: 4px;
+    }
+
+    .custom-popup .popup-title {
+        margin: 0 0 0.75rem 0;
+        color: #111827;
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    .dark .custom-popup .popup-title {
+        color: #f9fafb;
+    }
+
+    .custom-popup .popup-text {
+        margin: 0.375rem 0;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .dark .custom-popup .popup-text {
+        color: #e5e7eb;
+    }
+
+    .custom-popup .popup-text strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-text strong {
+        color: #f3f4f6;
+    }
+
+    .custom-popup .popup-muted {
+        margin: 0.5rem 0;
+        color: #6b7280;
+    }
+
+    .dark .custom-popup .popup-muted {
+        color: #9ca3af;
+    }
+
+    .custom-popup .popup-muted strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-muted strong {
+        color: #d1d5db;
+    }
+
+    .custom-popup .popup-divider {
+        margin: 0.75rem 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .dark .custom-popup .popup-divider {
+        border-top-color: #374151;
+    }
+
+    .custom-popup .popup-small {
+        margin: 0.375rem 0;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .dark .custom-popup .popup-small {
+        color: #9ca3af;
+    }
+
+    .custom-popup .popup-small strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-small strong {
+        color: #d1d5db;
+    }
+
+    .custom-popup .badge {
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-block;
+        margin-left: 4px;
+    }
+
+    .custom-popup .badge-success {
+        background-color: rgb(5 150 105);
+        color: rgb(240 253 244);
+    }
+
+    .custom-popup .badge-warning {
+        background-color: rgb(217 119 6);
+        color: rgb(254 252 232);
+    }
+
+    .custom-popup .badge-danger {
+        background-color: rgb(220 38 38);
+        color: rgb(254 242 242);
+    }
+
+    .custom-popup .badge-default {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .dark .custom-popup .badge-default {
+        background-color: #374151;
+        color: #d1d5db;
+    }
+
+    .custom-popup .popup-button-wrapper {
+        margin: 0.75rem 0 0.25rem 0;
+        text-align: center;
+    }
+
+    .custom-popup .popup-button {
+        display: inline-block;
+        background: #f3f4f6;
+        color: #374151;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .dark .custom-popup .popup-button {
+        background: #374151;
+        color: #f3f4f6;
+        border-color: #4b5563;
+    }
+
+    .custom-popup .popup-button:hover {
+        background: #e5e7eb;
+    }
+
+    .dark .custom-popup .popup-button:hover {
+        background: #4b5563;
+    }
 </style>
 {% endblock %}
 
@@ -59,11 +225,11 @@
     <div id="comuni-map"></div>
     <div class="map-loader" id="map-loader">
         <div class="spinner"></div>
-        <span style="color: rgb(75 85 99);">Caricamento comuni...</span>
+        <span class="text-gray-600 dark:text-gray-300">Caricamento comuni...</span>
     </div>
     <!-- Contatore comuni visualizzati -->
-    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000; font-size: 0.875rem; font-weight: 500;">
-        <span id="comuni-counter">Caricamento...</span>
+    <div class="absolute top-2.5 right-2.5 bg-white/95 dark:bg-gray-800/95 px-3 py-2 rounded-lg shadow-md z-[1000]">
+        <span id="comuni-counter" class="text-sm font-medium text-gray-700 dark:text-gray-300">Caricamento...</span>
     </div>
 </div>
 
@@ -135,11 +301,29 @@
         // Prova a caricare da sessionStorage (persiste tra reload)
         try {
             var cachedData = sessionStorage.getItem('comuni_geojson_cache');
-            if (cachedData) {
-                console.log('Caricamento da cache sessionStorage');
+            var cacheVersion = sessionStorage.getItem('comuni_cache_version');
+            var currentVersion = '2.0'; // Incrementa quando cambia la struttura dati
+
+            if (cachedData && cacheVersion === currentVersion) {
+                console.log('Caricamento da cache sessionStorage (v' + currentVersion + ')');
                 allComuniData = JSON.parse(cachedData);
-                filterAndDisplayComuni();
-                return;
+
+                // Valida che abbia la struttura corretta
+                if (allComuniData && allComuniData.features && allComuniData.features.length > 0) {
+                    var firstFeature = allComuniData.features[0];
+                    if (firstFeature.properties && firstFeature.properties.nome) {
+                        filterAndDisplayComuni();
+                        return;
+                    } else {
+                        console.warn('Cache con struttura non valida, ricarico dal server');
+                        sessionStorage.removeItem('comuni_geojson_cache');
+                        sessionStorage.removeItem('comuni_cache_version');
+                    }
+                }
+            } else if (cachedData && cacheVersion !== currentVersion) {
+                console.log('Cache obsoleta (v' + cacheVersion + '), svuoto e ricarico');
+                sessionStorage.removeItem('comuni_geojson_cache');
+                sessionStorage.removeItem('comuni_cache_version');
             }
         } catch (e) {
             console.warn('Cache sessionStorage non disponibile:', e);
@@ -159,14 +343,21 @@
                 // Prova a salvare anche in sessionStorage (se non troppo grande)
                 try {
                     var jsonString = JSON.stringify(data);
+                    var currentVersion = '2.0';
                     sessionStorage.setItem('comuni_geojson_cache', jsonString);
-                    console.log('Salvato in cache sessionStorage (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
+                    sessionStorage.setItem('comuni_cache_version', currentVersion);
+                    console.log('Salvato in cache sessionStorage v' + currentVersion + ' (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
                 } catch (e) {
                     console.warn('Impossibile salvare in sessionStorage (troppo grande?):', e);
                     // Non è un errore critico, funziona comunque con cache memoria
                 }
 
                 console.log('Caricati ' + data.features.length + ' comuni dal server');
+
+                // Debug: mostra esempio di feature per verificare struttura
+                if (data.features && data.features.length > 0) {
+                    console.log('Esempio feature:', data.features[0].properties);
+                }
 
                 // Mostra con eventuale filtro
                 filterAndDisplayComuni();
@@ -176,7 +367,11 @@
             })
             .catch(error => {
                 console.error('Errore caricamento comuni:', error);
-                loader.innerHTML = '<span style="color: #dc2626;">Errore caricamento mappa</span>';
+                loader.style.display = 'flex';
+                loader.querySelector('.spinner').style.display = 'none';
+                var errorText = loader.querySelector('span');
+                errorText.textContent = 'Errore caricamento mappa';
+                errorText.className = 'text-red-600 dark:text-red-400 font-medium';
             });
     }
 
@@ -240,28 +435,120 @@
         console.log('Mostrati', visibleCount, 'comuni');
     }
 
+    // Genera contenuto popup dinamicamente (si adatta al tema corrente)
+    function generatePopupContent(props) {
+        var content = '<div class="popup-wrapper">';
+        content += '<h3 class="popup-title">' + (props.nome || 'N/D') + '</h3>';
+        content += '<p class="popup-text"><strong>Provincia:</strong> ' + (props.provincia || 'N/D') + '</p>';
+
+        // Media Radon
+        if (props.media_radon !== null) {
+            var radonClass;
+            if (props.media_radon > 300) {
+                radonClass = 'badge-danger';
+            } else if (props.media_radon > 200) {
+                radonClass = 'badge-warning';
+            } else {
+                radonClass = 'badge-success';
+            }
+            content += '<p class="popup-text"><strong>Radon medio:</strong> ' +
+                      '<span class="badge ' + radonClass + '">' + props.media_radon + ' Bq/m³</span></p>';
+        } else {
+            content += '<p class="popup-muted"><strong>Radon medio:</strong> <em>Dato non disponibile</em></p>';
+        }
+
+        // Area Prioritaria
+        if (props.area_prioritaria && props.area_prioritaria !== 'N/D') {
+            var apText = props.area_prioritaria;
+            var apClass;
+            if (apText.toLowerCase().includes('non prioritari')) {
+                apClass = 'badge-success';
+            } else if (apText.toLowerCase().includes('attenzione')) {
+                apClass = 'badge-warning';
+            } else if (apText.toLowerCase().includes('prioritari')) {
+                apClass = 'badge-danger';
+            } else {
+                apClass = 'badge-default';
+            }
+            content += '<p class="popup-text"><strong>Piano Radon:</strong> ' +
+                      '<span class="badge ' + apClass + '">' + apText + '</span></p>';
+        } else {
+            content += '<p class="popup-muted"><strong>Piano Radon:</strong> <em>Dato non disponibile</em></p>';
+        }
+
+        content += '<hr class="popup-divider">';
+        content += '<p class="popup-small"><strong>Codice ISTAT:</strong> ' + (props.codice_istat || 'N/D') + '</p>';
+
+        if (props.codice_istat) {
+            var detailUrl = '/secret-admin/territorio/comunearpa/' + props.codice_istat + '/change/' + window.location.search;
+            content += '<p class="popup-button-wrapper"><a href="' + detailUrl + '" class="popup-button">📊 Visualizza dettagli completi</a></p>';
+        }
+
+        content += '</div>';
+        return content;
+    }
+
     // Crea il layer con tutti i comuni UNA SOLA VOLTA
     function createComuniLayer() {
         comuniLayer = L.geoJSON(allComuniData, {
             smoothFactor: 2.0,
             style: function(feature) {
+                var props = feature.properties;
+                var fillColor = '#93c5fd'; // azzurro chiaro default
+                var borderColor = '#60a5fa';
+                var fillOpacity = 0.2;
+
+                // Colora in base all'area prioritaria
+                if (props.area_prioritaria && props.area_prioritaria !== 'N/D') {
+                    var apText = props.area_prioritaria.toLowerCase();
+
+                    if (apText.includes('non prioritari')) {
+                        // Verde - sicuro
+                        fillColor = '#86efac';
+                        borderColor = '#22c55e';
+                        fillOpacity = 0.25;
+                    } else if (apText.includes('attenzione')) {
+                        // Giallo/arancio - attenzione
+                        fillColor = '#fcd34d';
+                        borderColor = '#f59e0b';
+                        fillOpacity = 0.35;
+                    } else if (apText.includes('prioritari')) {
+                        // Rosso - rischio alto
+                        fillColor = '#fca5a5';
+                        borderColor = '#ef4444';
+                        fillOpacity = 0.4;
+                    }
+                }
+
                 return {
-                    fillColor: '#3b82f6',
+                    fillColor: fillColor,
                     weight: 1,
                     opacity: 0.7,
-                    color: '#1e40af',
-                    fillOpacity: 0.25
+                    color: borderColor,
+                    fillOpacity: fillOpacity
                 };
             },
             onEachFeature: function(feature, layer) {
                 var props = feature.properties;
-                var popupContent =
-                    '<h3>' + props.nome + '</h3>' +
-                    '<p><strong>Provincia:</strong> ' + props.provincia + '</p>' +
-                    '<p><strong>Codice ISTAT:</strong> ' + props.codice_istat + '</p>' +
-                    '<p><a href="/secret-admin/territorio/comunearpa/' + props.codice_istat + '/change/">Visualizza dettagli</a></p>';
 
-                layer.bindPopup(popupContent);
+                // Protezione contro dati mancanti o undefined
+                if (!props || !props.nome) {
+                    console.warn('Feature senza properties valide:', feature);
+                    return;
+                }
+
+                // Crea popup con funzione che genera contenuto dinamico AL MOMENTO dell'apertura
+                var popup = L.popup({
+                    maxWidth: 300,
+                    className: 'custom-popup' // Usa CSS per styling
+                });
+
+                // Genera contenuto popup dinamicamente quando viene aperto
+                popup.setContent(function() {
+                    return generatePopupContent(props);
+                });
+
+                layer.bindPopup(popup);
 
                 // Highlight al passaggio del mouse
                 layer.on('mouseover', function(e) {

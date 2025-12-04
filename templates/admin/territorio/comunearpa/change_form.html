@@ -1,0 +1,313 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'css/custom_admin.css' %}" />
+<style>
+    /* FORZA MAPPA A TUTTA LARGHEZZA - Usa classe JS aggiunta dinamicamente */
+
+    /* Form-row della mappa */
+    .form-row.map-full-width {
+        display: block !important;
+        grid-template-columns: none !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .form-row.map-full-width > * {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .form-row.map-full-width .field-line,
+    .form-row.map-full-width .grow,
+    .form-row.map-full-width .readonly {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* Form-row dati geologici */
+    .form-row.geo-full-width {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .form-row.geo-full-width > * {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .form-row.geo-full-width .field-line,
+    .form-row.geo-full-width .grow,
+    .form-row.geo-full-width .readonly {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* Mappe Leaflet */
+    .comune-detail-map,
+    .leaflet-container {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* Container mappa dettaglio */
+    #detail-map-container {
+        margin: 1.5rem 0;
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    }
+
+    .dark #detail-map-container {
+        background: #1f2937;
+    }
+
+    #detail-map-container h2 {
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .dark #detail-map-container h2 {
+        color: #f9fafb;
+    }
+
+    /* Mappa dettaglio comune */
+    #detail-map {
+        height: 500px;
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        z-index: 1;
+    }
+
+    .dark #detail-map {
+        border-color: #374151;
+    }
+    /* Stili popup che seguono il tema */
+    .leaflet-popup-content-wrapper {
+        background: white !important;
+        color: #111827 !important;
+        border-radius: 0.5rem !important;
+    }
+
+    .dark .leaflet-popup-content-wrapper {
+        background: #1f2937 !important;
+        color: #f9fafb !important;
+    }
+
+    .leaflet-popup-tip {
+        background: white !important;
+    }
+
+    .dark .leaflet-popup-tip {
+        background: #1f2937 !important;
+    }
+</style>
+<script src="/static/leaflet/leaflet.js"></script>
+<script>
+// FORZA MAPPA A TUTTA LARGHEZZA - Aggiunge classe alla row della mappa
+(function() {
+    function forceMapFullWidth() {
+        // Trova il label "Mappa Confini Comunali"
+        var labels = document.querySelectorAll('label');
+        for (var i = 0; i < labels.length; i++) {
+            if (labels[i].textContent.indexOf('Mappa Confini Comunali') !== -1) {
+                // Risale alla form-row
+                var formRow = labels[i].closest('.form-row');
+                if (formRow) {
+                    formRow.classList.add('map-full-width');
+                    console.log('✓ Classe map-full-width aggiunta');
+                }
+                break;
+            }
+        }
+
+        // Trova anche il container dati geologici
+        for (var i = 0; i < labels.length; i++) {
+            if (labels[i].textContent.indexOf('Informazioni Geologiche') !== -1) {
+                var formRow = labels[i].closest('.form-row');
+                if (formRow) {
+                    formRow.classList.add('geo-full-width');
+                }
+                break;
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceMapFullWidth);
+    } else {
+        forceMapFullWidth();
+    }
+})();
+
+(function() {
+    // Salva i parametri della query string per usarli quando si chiude
+    var originalParams = window.location.search;
+
+    // Sovrascrivi history.back() per preservare i filtri
+    var originalBack = history.back.bind(history);
+    history.back = function() {
+        if (originalParams && document.referrer.includes('/territorio/comunearpa/')) {
+            // Torna alla changelist con i filtri
+            var baseUrl = window.location.pathname.replace(/\/[^\/]+\/change\/$/, '/');
+            window.location.href = baseUrl + originalParams;
+        } else {
+            originalBack();
+        }
+    };
+
+    // Intercetta TUTTI i click sui bottoni/link
+    document.addEventListener('click', function(e) {
+        var target = e.target;
+
+        // Cerca il link/bottone più vicino
+        var link = target.closest('a, button, [role="button"]');
+        if (!link) return;
+
+        var text = link.textContent.trim().toLowerCase();
+        var href = link.getAttribute('href');
+        var onclick = link.getAttribute('onclick');
+
+        // Se è un bottone "Chiudi" o link che torna indietro
+        if (text.includes('chiudi') || text.includes('close') ||
+            (onclick && onclick.includes('history.back')) ||
+            (href && href === '../')) {
+
+            if (!originalParams) return; // Nessun filtro da preservare
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Torna alla changelist con i filtri
+            var baseUrl = window.location.pathname.replace(/\/[^\/]+\/change\/$/, '/');
+            window.location.href = baseUrl + originalParams;
+        }
+        // Link che va esplicitamente alla changelist
+        else if (href && (href.includes('../') || href.includes('?'))) {
+            if (originalParams && href.includes('../')) {
+                e.preventDefault();
+                var newHref = href.includes('?')
+                    ? href + '&' + originalParams.substring(1)
+                    : href + originalParams;
+                window.location.href = newHref;
+            }
+        }
+    }, true); // Capture phase
+})();
+
+// Colora la mappa del SINGOLO comune - recupera area prioritaria da API
+(function() {
+    var codiceIstat = '{{ original.codice_istat|escapejs }}';
+
+    if (!codiceIstat) {
+        console.log('Codice ISTAT non disponibile, mappa resta blu');
+        return;
+    }
+
+    console.log('Carico area prioritaria per comune:', codiceIstat);
+
+    // Carica SOLO i dati di questo comune dall'API (usa cache sessionStorage)
+    var cacheKey = 'comuni_geojson_cache';
+    var cachedData = sessionStorage.getItem(cacheKey);
+
+    if (cachedData) {
+        console.log('Uso cache sessionStorage');
+        try {
+            var data = JSON.parse(cachedData);
+            processComune(data);
+        } catch (e) {
+            console.warn('Cache corrotta, ricarico');
+            fetchAndProcess();
+        }
+    } else {
+        fetchAndProcess();
+    }
+
+    function fetchAndProcess() {
+        fetch('/api/comuni-geojson/?simplify=0.001')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                console.log('Dati caricati da API');
+                processComune(data);
+            })
+            .catch(function(e) {
+                console.error('Errore caricamento dati:', e);
+            });
+    }
+
+    function processComune(data) {
+        var comune = null;
+        for (var i = 0; i < data.features.length; i++) {
+            if (data.features[i].properties.codice_istat === codiceIstat) {
+                comune = data.features[i];
+                break;
+            }
+        }
+
+        if (!comune) {
+            console.warn('Comune non trovato nell\'API');
+            return;
+        }
+
+        var areaPrioritaria = comune.properties.area_prioritaria || 'N/D';
+        console.log('Area prioritaria:', areaPrioritaria);
+
+        // Determina colori
+        var fillColor = '#93c5fd';
+        var borderColor = '#60a5fa';
+
+        if (areaPrioritaria && areaPrioritaria !== 'N/D') {
+            var ap = areaPrioritaria.toLowerCase();
+            if (ap.indexOf('non prioritari') >= 0) {
+                fillColor = '#86efac';
+                borderColor = '#22c55e';
+            } else if (ap.indexOf('attenzione') >= 0) {
+                fillColor = '#fcd34d';
+                borderColor = '#f59e0b';
+            } else if (ap.indexOf('prioritari') >= 0) {
+                fillColor = '#fca5a5';
+                borderColor = '#ef4444';
+            }
+        }
+
+        console.log('Colori:', fillColor);
+
+        // Colora la mappa
+        function colorMap() {
+            var paths = document.querySelectorAll('.leaflet-container svg path');
+            if (paths.length === 0) return false;
+
+            for (var i = 0; i < paths.length; i++) {
+                paths[i].setAttribute('fill', fillColor);
+                paths[i].setAttribute('stroke', borderColor);
+                paths[i].setAttribute('fill-opacity', '0.5');
+                paths[i].setAttribute('stroke-width', '3');
+            }
+
+            console.log('✓ Mappa colorata');
+            return true;
+        }
+
+        // Polling
+        var attempts = 0;
+        var interval = setInterval(function() {
+            if (colorMap() || ++attempts > 15) {
+                clearInterval(interval);
+            }
+        }, 100);
+    }
+})();
+</script>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+{% endblock %}

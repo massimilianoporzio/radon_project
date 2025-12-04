@@ -1,0 +1,63 @@
+<div class="space-y-3">
+    {% if has_data %}
+        {% if comune_completo.unita_litologica or comune_completo.litologia %}
+            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">🗻 Geologia</h4>
+                {% if comune_completo.unita_litologica %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 my-1">
+                        <strong class="text-gray-700 dark:text-gray-300">Unità:</strong>
+                        {{ comune_completo.unita_litologica }}
+                    </p>
+                {% endif %}
+                {% if comune_completo.litologia %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 my-1">
+                        <strong class="text-gray-700 dark:text-gray-300">Litologia:</strong>
+                        {{ comune_completo.litologia }}
+                    </p>
+                {% endif %}
+                {% if comune_completo.eta_geologica %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 my-1">
+                        <strong class="text-gray-700 dark:text-gray-300">Età:</strong>
+                        {{ comune_completo.eta_geologica }}
+                    </p>
+                {% endif %}
+                {% if comune_completo.dominio_geologico %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 my-1">
+                        <strong class="text-gray-700 dark:text-gray-300">Dominio:</strong>
+                        {{ comune_completo.dominio_geologico }}
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if comune_completo.classe_permeabilita %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 class="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2">💧 Permeabilità</h4>
+                <p class="text-sm text-blue-600 dark:text-blue-400 my-1">
+                    <strong class="text-blue-700 dark:text-blue-300">Classe:</strong>
+                    {{ comune_completo.classe_permeabilita }}
+                </p>
+            </div>
+        {% endif %}
+
+        {% if comune_completo.distanza_faglia_m is not None %}
+            <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 class="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">⚡ Faglie</h4>
+                <p class="text-sm text-amber-600 dark:text-amber-400 my-1">
+                    <strong class="text-amber-700 dark:text-amber-300">Distanza faglia più vicina:</strong>
+                    {{ comune_completo.distanza_faglia_m|floatformat:0 }} m
+                </p>
+                {% if comune_completo.tipo_faglia_vicina %}
+                    <p class="text-sm text-amber-600 dark:text-amber-400 my-1">
+                        <strong class="text-amber-700 dark:text-amber-300">Tipo faglia:</strong>
+                        {{ comune_completo.tipo_faglia_vicina }}
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="text-gray-400 dark:text-gray-500 italic text-sm">
+            Dati geologici non disponibili per questo comune
+        </p>
+    {% endif %}
+</div>

@@ -15,17 +15,22 @@ def comuni_geojson(request):
     tolerance = float(request.GET.get("simplify", "0.001"))
 
     # Query SQL diretta con PostGIS per semplificazione veloce
-    # Usa i nomi delle colonne dal modello e filtra solo comuni con geometria valida
+    # Include media radon e area prioritaria tramite LEFT JOIN
     sql = """
         SELECT
-            "esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_ist" as codice_istat,
-            "esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_nom" as nome,
-            "esri_geodatabase.geoportale.lim_01_comuni_in_vigore.provin_nom" as provincia,
-            ST_AsGeoJSON(ST_Simplify(geom, %s), 5) as geom_json
-        FROM medie_radon_comunali
-        WHERE geom IS NOT NULL
-          AND ST_IsValid(geom) = true
-          AND ST_GeometryType(geom) IN ('ST_Polygon', 'ST_MultiPolygon')
+            m."esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_ist" as codice_istat,
+            m."esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_nom" as nome,
+            m."esri_geodatabase.geoportale.lim_01_comuni_in_vigore.provin_nom" as provincia,
+            m."esri_geodatabase.geoportale.rad_18_tab_comuni_radon.media" as media_radon,
+            a."esri_geodatabase.geoportale.rad_18_tab_comuni_radon.ap" as area_prioritaria,
+            ST_AsGeoJSON(ST_Simplify(m.geom, %s), 5) as geom_json
+        FROM medie_radon_comunali m
+        LEFT JOIN aree_prioritarie_radon a
+            ON m."esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_ist" =
+               a."esri_geodatabase.geoportale.lim_01_comuni_in_vigore.comune_ist"
+        WHERE m.geom IS NOT NULL
+          AND ST_IsValid(m.geom) = true
+          AND ST_GeometryType(m.geom) IN ('ST_Polygon', 'ST_MultiPolygon')
         ORDER BY nome
     """
 
@@ -35,11 +40,14 @@ def comuni_geojson(request):
 
     features = []
     for row in rows:
-        codice_istat, nome, provincia, geom_json = row
+        codice_istat, nome, provincia, media_radon, area_prioritaria, geom_json = row
 
         # Salta se la geometria è ancora NULL (non dovrebbe succedere con il WHERE)
         if not geom_json:
             continue
+
+        # Formatta la media radon per una visualizzazione più pulita
+        media_radon_formatted = round(media_radon, 1) if media_radon is not None else None
 
         features.append(
             {
@@ -48,6 +56,8 @@ def comuni_geojson(request):
                     "codice_istat": codice_istat,
                     "nome": nome,
                     "provincia": provincia,
+                    "media_radon": media_radon_formatted,
+                    "area_prioritaria": area_prioritaria or "N/D",
                 },
                 "geometry": json.loads(geom_json),
             }

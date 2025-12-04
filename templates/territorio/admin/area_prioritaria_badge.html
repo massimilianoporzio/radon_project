@@ -1,0 +1,7 @@
+{% if area_prioritaria %}
+    <span class="{{ badge_class }} px-3 py-1.5 rounded-md font-semibold text-sm inline-block">
+        {{ area_prioritaria }}
+    </span>
+{% else %}
+    <span class="text-gray-400 dark:text-gray-500 italic">Non disponibile</span>
+{% endif %}
