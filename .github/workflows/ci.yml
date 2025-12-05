@@ -68,14 +68,8 @@ jobs:
             sleep 1
           done
 
-      # Enable PostGIS on template1 database so new databases inherit it
-      - name: Enable PostGIS on Template Database
-        env:
-          PGPASSWORD: postgres
-        run: |
-          psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-          psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;"
-          echo "✅ PostGIS enabled on template1 database"
+      # Note: PostGIS extensions are automatically enabled by conftest.py
+      # when the test database is created by pytest
 
       # ESECUZIONE TEST SU POSTGIS
       - name: Run Tests with Coverage (PostGIS)
