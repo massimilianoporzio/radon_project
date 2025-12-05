@@ -29,6 +29,8 @@ LOGGING = {
     },
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO"},
+        # Silenzia i WARNING 404 per file statici (source maps, favicon, etc.)
+        "django.server": {"handlers": ["console"], "level": "ERROR"},
         # Scommenta sotto se vuoi vedere le query SQL nel terminale
         # 'django.db.backends': {'handlers': ['console'], 'level': 'DEBUG'},
     },
@@ -78,6 +80,27 @@ if os.name == "nt":
         if gdal_dlls:
             # Prende il primo file gdalXXX.dll valido
             GDAL_LIBRARY_PATH = str(gdal_dlls[0])
+
+        # 2b. Configura PROJ_LIB per evitare conflitti con PostgreSQL
+        # Cerca la cartella proj_data nel virtual environment
+        proj_data_dir = OSGEO_ROOT / "data" / "proj"
+        if proj_data_dir.exists():
+            os.environ["PROJ_LIB"] = str(proj_data_dir)
+            logger.info("PROJ_LIB configurato: %s", proj_data_dir)
+        else:
+            # Prova percorso alternativo
+            proj_data_fallback = VENV_ROOT / "Lib" / "site-packages" / "pyproj" / "proj_dir" / "share" / "proj"
+            if proj_data_fallback.exists():
+                os.environ["PROJ_LIB"] = str(proj_data_fallback)
+                logger.info("PROJ_LIB configurato (fallback): %s", proj_data_fallback)
+            else:
+                logger.warning(
+                    "ATTENZIONE: Nessuna cartella PROJ_LIB trovata. "
+                    "Controlla che esista '%s' o '%s'. "
+                    "PROJ potrebbe non funzionare correttamente per le trasformazioni di coordinate.",
+                    proj_data_dir,
+                    proj_data_fallback,
+                )
 
         # 3. Configura GEOS (CRITICO: Deve essere geos_c.dll)
         # Django richiede l'interfaccia C, non la libreria C++ (geos.dll)

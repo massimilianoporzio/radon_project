@@ -184,3 +184,53 @@ a.user-avatar-icon span.material-symbols-outlined {
   background: var(--color-primary-500) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* ===== LAYOUT CUSTOM PER FORM COMUNE ===== */
+
+/* Forza la mappa a occupare tutta la larghezza disponibile */
+.field-mappa_confini {
+  grid-column: 1 / -1 !important; /* Occupa tutte le colonne della grid */
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Container della mappa leaflet a tutta larghezza */
+.field-mappa_confini .leaflet-container {
+  width: 100% !important;
+  height: 500px !important;
+  border-radius: 0.5rem;
+}
+
+/* Forza anche i dati radon sulla stessa riga quando c'è spazio */
+@media (min-width: 1024px) {
+  /* Container del form a 2 colonne su schermi grandi */
+  .field-media_radon,
+  .field-area_prioritaria_display {
+    display: inline-block;
+    width: calc(50% - 0.5rem);
+    vertical-align: top;
+  }
+
+  .field-media_radon {
+    margin-right: 1rem;
+  }
+}
+
+/* Dati geologici anche loro a tutta larghezza quando aperti */
+.field-dati_geologici_display {
+  grid-column: 1 / -1 !important;
+  max-width: 100% !important;
+}
+
+/* Migliora visualizzazione card geologiche su schermi larghi */
+@media (min-width: 1280px) {
+  .field-dati_geologici_display .space-y-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .field-dati_geologici_display .space-y-3 > div {
+    margin: 0 !important;
+  }
+}

@@ -1,0 +1,675 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'css/leaflet_unfold_theme.css' %}" />
+<style>
+    /* Stili specifici per la lista */
+    #comuni-map-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Assicura che i filtri Unfold siano sopra la mappa */
+    [data-controller="filters"] {
+        z-index: 1000 !important;
+    }
+
+    /* Loader per la mappa */
+    .map-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 2rem;
+        border-radius: 0.5rem;
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .map-loader {
+        background: rgba(17, 24, 39, 0.9);
+    }
+
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgb(229 231 235);
+        border-top-color: rgb(37 99 235);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Stili popup Leaflet che seguono tema Unfold */
+    .leaflet-popup-content-wrapper {
+        background: white !important;
+        color: #111827 !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    }
+
+    .dark .leaflet-popup-content-wrapper {
+        background: #1f2937 !important;
+        color: #f9fafb !important;
+    }
+
+    .leaflet-popup-tip {
+        background: white !important;
+    }
+
+    .dark .leaflet-popup-tip {
+        background: #1f2937 !important;
+    }
+
+    .custom-popup .popup-wrapper {
+        min-width: 280px;
+        padding: 4px;
+    }
+
+    .custom-popup .popup-title {
+        margin: 0 0 0.75rem 0;
+        color: #111827;
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    .dark .custom-popup .popup-title {
+        color: #f9fafb;
+    }
+
+    .custom-popup .popup-text {
+        margin: 0.375rem 0;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .dark .custom-popup .popup-text {
+        color: #e5e7eb;
+    }
+
+    .custom-popup .popup-text strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-text strong {
+        color: #f3f4f6;
+    }
+
+    .custom-popup .popup-muted {
+        margin: 0.5rem 0;
+        color: #6b7280;
+    }
+
+    .dark .custom-popup .popup-muted {
+        color: #9ca3af;
+    }
+
+    .custom-popup .popup-muted strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-muted strong {
+        color: #d1d5db;
+    }
+
+    .custom-popup .popup-divider {
+        margin: 0.75rem 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .dark .custom-popup .popup-divider {
+        border-top-color: #374151;
+    }
+
+    .custom-popup .popup-small {
+        margin: 0.375rem 0;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .dark .custom-popup .popup-small {
+        color: #9ca3af;
+    }
+
+    .custom-popup .popup-small strong {
+        color: #4b5563;
+    }
+
+    .dark .custom-popup .popup-small strong {
+        color: #d1d5db;
+    }
+
+    .custom-popup .badge {
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-block;
+        margin-left: 4px;
+    }
+
+    .custom-popup .badge-success {
+        background-color: rgb(5 150 105);
+        color: rgb(240 253 244);
+    }
+
+    .custom-popup .badge-warning {
+        background-color: rgb(217 119 6);
+        color: rgb(254 252 232);
+    }
+
+    .custom-popup .badge-danger {
+        background-color: rgb(220 38 38);
+        color: rgb(254 242 242);
+    }
+
+    .custom-popup .badge-default {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .dark .custom-popup .badge-default {
+        background-color: #374151;
+        color: #d1d5db;
+    }
+
+    .custom-popup .popup-button-wrapper {
+        margin: 0.75rem 0 0.25rem 0;
+        text-align: center;
+    }
+
+    .custom-popup .popup-button {
+        display: inline-block;
+        background: #f3f4f6;
+        color: #374151;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .dark .custom-popup .popup-button {
+        background: #374151;
+        color: #f3f4f6;
+        border-color: #4b5563;
+    }
+
+    .custom-popup .popup-button:hover {
+        background: #e5e7eb;
+    }
+
+    .dark .custom-popup .popup-button:hover {
+        background: #4b5563;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mappa dei comuni sopra la tabella -->
+<div id="comuni-map-container" style="position: relative;">
+    <div id="comuni-map"></div>
+    <div class="map-loader" id="map-loader">
+        <div class="spinner"></div>
+        <span class="text-gray-600 dark:text-gray-300">Caricamento comuni...</span>
+    </div>
+    <!-- Contatore comuni visualizzati -->
+    <div class="absolute top-2.5 right-2.5 bg-white/95 dark:bg-gray-800/95 px-3 py-2 rounded-lg shadow-md z-[1000]">
+        <span id="comuni-counter" class="text-sm font-medium text-gray-700 dark:text-gray-300">Caricamento...</span>
+    </div>
+</div>
+
+<!-- Tabella normale di Unfold -->
+{{ block.super }}
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<script>
+(function() {
+    // Costante per versione cache - incrementa quando cambia la struttura dati
+    var CACHE_VERSION = '2.0';
+
+    // Soglie radon dal backend (fonte unica di verità)
+    var RADON_THRESHOLD_HIGH = {{ radon_threshold_high }};    // {{ radon_threshold_high }} Bq/m³
+    var RADON_THRESHOLD_MEDIUM = {{ radon_threshold_medium }}; // {{ radon_threshold_medium }} Bq/m³
+
+    // URL base admin dal backend (evita hardcoding)
+    var ADMIN_BASE_URL = '{{ admin_base_url }}';
+
+    var map;
+    var comuniLayer;
+    var loader = document.getElementById('map-loader');
+    var allComuniData = null; // Cache dei dati
+    var lastProvinciaFilter = undefined; // Ultimo filtro applicato (undefined = non ancora inizializzato)
+
+    /**
+     * Centralizza la logica dei colori per area prioritaria.
+     * Mantiene coerenza con territorio/utils.py::get_area_prioritaria_badge_class
+     * @param {string} areaPrioritaria - es. "Aree prioritarie", "Aree attenzionate", etc.
+     * @returns {object} - { badgeClass, fillColor, borderColor, fillOpacity }
+     */
+    function getAreaPrioritariaColors(areaPrioritaria) {
+        var defaultColors = {
+            badgeClass: 'badge-default',
+            fillColor: '#93c5fd',    // azzurro chiaro
+            borderColor: '#60a5fa',
+            fillOpacity: 0.2
+        };
+
+        if (!areaPrioritaria || areaPrioritaria === 'N/D') {
+            return defaultColors;
+        }
+
+        var apLower = areaPrioritaria.toLowerCase();
+
+        // Prioritaria (rosso) - ma NON "non prioritaria"
+        if (apLower.includes('prioritari') && !apLower.includes('non')) {
+            return {
+                badgeClass: 'badge-danger',
+                fillColor: '#fca5a5',   // rosso chiaro
+                borderColor: '#ef4444',
+                fillOpacity: 0.4
+            };
+        }
+        // Attenzionata (arancione)
+        if (apLower.includes('attenzione')) {
+            return {
+                badgeClass: 'badge-warning',
+                fillColor: '#fcd34d',   // giallo/arancio
+                borderColor: '#f59e0b',
+                fillOpacity: 0.35
+            };
+        }
+        // Non prioritaria (verde)
+        if (apLower.includes('non prioritari')) {
+            return {
+                badgeClass: 'badge-success',
+                fillColor: '#86efac',   // verde chiaro
+                borderColor: '#22c55e',
+                fillOpacity: 0.25
+            };
+        }
+
+        return defaultColors;
+    }
+
+    // Inizializza la mappa
+    function initMap() {
+        // Prova a recuperare l'ultima vista della mappa da sessionStorage
+        var savedView = null;
+        try {
+            var savedViewStr = sessionStorage.getItem('map_view_state');
+            if (savedViewStr) {
+                savedView = JSON.parse(savedViewStr);
+            }
+        } catch (e) {
+            console.warn('Impossibile recuperare vista mappa da cache');
+        }
+
+        // Crea mappa con vista salvata o default
+        var center = savedView ? [savedView.lat, savedView.lng] : [45.0, 7.6];
+        var zoom = savedView ? savedView.zoom : 8;
+
+        map = L.map('comuni-map').setView(center, zoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Salva la vista quando la mappa si muove
+        map.on('moveend', function() {
+            var center = map.getCenter();
+            var zoom = map.getZoom();
+            try {
+                sessionStorage.setItem('map_view_state', JSON.stringify({
+                    lat: center.lat,
+                    lng: center.lng,
+                    zoom: zoom
+                }));
+            } catch (e) {
+                // Ignora errori di storage
+            }
+        });
+
+        loadComuni();
+    }
+
+    // Carica TUTTI i comuni con cache persistente in sessionStorage
+    function loadComuni() {
+        // Se abbiamo già i dati in cache memoria, usa quelli
+        if (allComuniData) {
+            filterAndDisplayComuni();
+            return;
+        }
+
+        // Prova a caricare da sessionStorage (persiste tra reload)
+        try {
+            var cachedData = sessionStorage.getItem('comuni_geojson_cache');
+            var cacheVersion = sessionStorage.getItem('comuni_cache_version');
+
+            if (cachedData && cacheVersion === CACHE_VERSION) {
+                console.log('Caricamento da cache sessionStorage (v' + CACHE_VERSION + ')');
+                allComuniData = JSON.parse(cachedData);
+
+                // Valida che abbia la struttura corretta
+                if (allComuniData && allComuniData.features && allComuniData.features.length > 0) {
+                    var firstFeature = allComuniData.features[0];
+                    if (firstFeature.properties && firstFeature.properties.nome) {
+                        filterAndDisplayComuni();
+                        return;
+                    } else {
+                        console.warn('Cache con struttura non valida, ricarico dal server');
+                        sessionStorage.removeItem('comuni_geojson_cache');
+                        sessionStorage.removeItem('comuni_cache_version');
+                    }
+                }
+            } else if (cachedData && cacheVersion !== CACHE_VERSION) {
+                console.log('Cache obsoleta (v' + cacheVersion + '), svuoto e ricarico');
+                sessionStorage.removeItem('comuni_geojson_cache');
+                sessionStorage.removeItem('comuni_cache_version');
+            }
+        } catch (e) {
+            console.warn('Cache sessionStorage non disponibile:', e);
+        }
+
+        // Mostra loader solo se non c'è cache
+        loader.style.display = 'flex';
+        loader.querySelector('span').textContent = 'Caricamento comuni semplificati...';
+
+        // Carica tutti i comuni con semplificazione 0.001 (~100m)
+        fetch('/api/comuni-geojson/?simplify=0.001')
+            .then(response => response.json())
+            .then(data => {
+                // Salva in cache memoria
+                allComuniData = data;
+
+                // Prova a salvare anche in sessionStorage (se non troppo grande)
+                try {
+                    var jsonString = JSON.stringify(data);
+                    sessionStorage.setItem('comuni_geojson_cache', jsonString);
+                    sessionStorage.setItem('comuni_cache_version', CACHE_VERSION);
+                    console.log('Salvato in cache sessionStorage v' + CACHE_VERSION + ' (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
+                } catch (e) {
+                    console.warn('Impossibile salvare in sessionStorage (troppo grande?):', e);
+                    // Non è un errore critico, funziona comunque con cache memoria
+                }
+
+                console.log('Caricati ' + data.features.length + ' comuni dal server');
+
+                // Debug: mostra esempio di feature per verificare struttura
+                if (data.features && data.features.length > 0) {
+                    console.log('Esempio feature:', data.features[0].properties);
+                }
+
+                // Mostra con eventuale filtro
+                filterAndDisplayComuni();
+
+                // Nascondi loader
+                loader.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Errore caricamento comuni:', error);
+                loader.style.display = 'flex';
+                loader.querySelector('.spinner').style.display = 'none';
+                var errorText = loader.querySelector('span');
+                errorText.textContent = 'Errore caricamento mappa';
+                errorText.className = 'text-red-600 dark:text-red-400 font-medium';
+            });
+    }
+
+    // Filtra e visualizza i comuni in base alla provincia selezionata
+    function filterAndDisplayComuni() {
+        // Se non esiste ancora il layer, crealo
+        if (!comuniLayer) {
+            createComuniLayer();
+            return;
+        }
+
+        // Ottieni filtro provincia dalla URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var provinciaFilter = urlParams.get('provincia__exact') ||
+                             urlParams.get('provincia') ||
+                             urlParams.get('provincia__iexact');
+
+        // Normalizza a null se undefined
+        if (provinciaFilter === undefined) provinciaFilter = null;
+
+        // Determina se il filtro è cambiato (zoom solo se diverso dal precedente)
+        // undefined significa "primo caricamento" -> zoom sempre
+        var filterChanged = (lastProvinciaFilter === undefined) || (lastProvinciaFilter !== provinciaFilter);
+
+        console.log('Applicazione filtro - Provincia:', provinciaFilter || 'Tutte', '(ultimo:', lastProvinciaFilter, 'cambiato:', filterChanged + ')');
+
+        var visibleCount = 0;
+        var bounds = L.latLngBounds([]);
+
+        // Mostra/nascondi i layer esistenti senza ricrearli
+        comuniLayer.eachLayer(function(layer) {
+            var props = layer.feature.properties;
+            var shouldShow = !provinciaFilter || props.provincia === provinciaFilter;
+
+            if (shouldShow) {
+                if (!map.hasLayer(layer)) {
+                    layer.addTo(map);
+                }
+                visibleCount++;
+                bounds.extend(layer.getBounds());
+            } else {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            }
+        });
+
+        // Zoom automatico SOLO se il filtro è cambiato
+        if (filterChanged && bounds.isValid()) {
+            map.fitBounds(bounds, {
+                padding: [20, 20],
+                maxZoom: 10
+            });
+        }
+
+        // Aggiorna ultimo filtro applicato
+        lastProvinciaFilter = provinciaFilter;
+
+        // Aggiorna contatore
+        updateCounter(visibleCount);
+        console.log('Mostrati', visibleCount, 'comuni');
+    }
+
+    // Genera contenuto popup dinamicamente (si adatta al tema corrente)
+    function generatePopupContent(props) {
+        var content = '<div class="popup-wrapper">';
+        content += '<h3 class="popup-title">' + (props.nome || 'N/D') + '</h3>';
+        content += '<p class="popup-text"><strong>Provincia:</strong> ' + (props.provincia || 'N/D') + '</p>';
+
+        // Media Radon
+        if (props.media_radon !== null) {
+            var radonClass;
+            if (props.media_radon > RADON_THRESHOLD_HIGH) {
+                radonClass = 'badge-danger';
+            } else if (props.media_radon > RADON_THRESHOLD_MEDIUM) {
+                radonClass = 'badge-warning';
+            } else {
+                radonClass = 'badge-success';
+            }
+            content += '<p class="popup-text"><strong>Radon medio:</strong> ' +
+                      '<span class="badge ' + radonClass + '">' + props.media_radon + ' Bq/m³</span></p>';
+        } else {
+            content += '<p class="popup-muted"><strong>Radon medio:</strong> <em>Dato non disponibile</em></p>';
+        }
+
+        // Area Prioritaria
+        if (props.area_prioritaria && props.area_prioritaria !== 'N/D') {
+            var apText = props.area_prioritaria;
+            var colors = getAreaPrioritariaColors(apText);
+            content += '<p class="popup-text"><strong>Piano Radon:</strong> ' +
+                      '<span class="badge ' + colors.badgeClass + '">' + apText + '</span></p>';
+        } else {
+            content += '<p class="popup-muted"><strong>Piano Radon:</strong> <em>Dato non disponibile</em></p>';
+        }
+
+        content += '<hr class="popup-divider">';
+        content += '<p class="popup-small"><strong>Codice ISTAT:</strong> ' + (props.codice_istat || 'N/D') + '</p>';
+
+        if (props.codice_istat) {
+            var detailUrl = ADMIN_BASE_URL + '/' + props.codice_istat + '/change/' + window.location.search;
+            content += '<p class="popup-button-wrapper"><a href="' + detailUrl + '" class="popup-button">📊 Visualizza dettagli completi</a></p>';
+        }
+
+        content += '</div>';
+        return content;
+    }
+
+    // Crea il layer con tutti i comuni UNA SOLA VOLTA
+    function createComuniLayer() {
+        comuniLayer = L.geoJSON(allComuniData, {
+            smoothFactor: 2.0,
+            style: function(feature) {
+                var props = feature.properties;
+                var colors = getAreaPrioritariaColors(props.area_prioritaria);
+
+                return {
+                    fillColor: colors.fillColor,
+                    weight: 1,
+                    opacity: 0.7,
+                    color: colors.borderColor,
+                    fillOpacity: colors.fillOpacity
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                var props = feature.properties;
+                var colors = getAreaPrioritariaColors(props.area_prioritaria);
+
+                // Salva lo stile originale per poter ripristinarlo al mouseout
+                layer._originalStyle = {
+                    fillOpacity: colors.fillOpacity,
+                    weight: 1
+                };
+
+                // Protezione contro dati mancanti o undefined
+                if (!props || !props.nome) {
+                    console.warn('Feature senza properties valide:', feature);
+                    return;
+                }
+
+                // Crea popup con funzione che genera contenuto dinamico AL MOMENTO dell'apertura
+                var popup = L.popup({
+                    maxWidth: 300,
+                    className: 'custom-popup' // Usa CSS per styling
+                });
+
+                // Genera contenuto popup dinamicamente quando viene aperto
+                popup.setContent(function() {
+                    return generatePopupContent(props);
+                });
+
+                layer.bindPopup(popup);
+
+                // Highlight al passaggio del mouse
+                layer.on('mouseover', function(e) {
+                    e.target.setStyle({
+                        fillOpacity: 0.6,
+                        weight: 2
+                    });
+                });
+
+                layer.on('mouseout', function(e) {
+                    // Ripristina lo stile originale (mantiene la distinzione visuale tra aree)
+                    e.target.setStyle({
+                        fillOpacity: e.target._originalStyle.fillOpacity,
+                        weight: e.target._originalStyle.weight
+                    });
+                });
+            }
+        });
+
+        // Applica il filtro iniziale
+        filterAndDisplayComuni();
+    }
+
+    // Aggiorna contatore comuni visualizzati
+    function updateCounter(count) {
+        var counter = document.getElementById('comuni-counter');
+        if (counter) {
+            counter.textContent = count + ' comuni visualizzati';
+        }
+    }
+
+    // Intercetta i cambiamenti nella URL e nel DOM (quando Unfold applica i filtri)
+    var lastUrl = location.href;
+
+    // MutationObserver: osserva quando Unfold ricarica la tabella
+    var resultList = document.querySelector('#result_list, .results, [role="table"]');
+    if (resultList) {
+        var observer = new MutationObserver(function(mutations) {
+            // Controlla se l'URL è cambiata
+            var currentUrl = location.href;
+
+            if (currentUrl !== lastUrl) {
+                console.log('Rilevato cambiamento filtri, riapplico filtro mappa');
+                lastUrl = currentUrl;
+
+                if (allComuniData) {
+                    filterAndDisplayComuni();
+                }
+            }
+        });
+
+        // Osserva modifiche alla tabella risultati (Unfold la ricarica via AJAX)
+        observer.observe(resultList, {
+            childList: true,    // Osserva aggiunta/rimozione figli
+            subtree: true,      // Osserva anche i discendenti
+            attributes: false   // Non serve osservare attributi
+        });
+
+        console.log('MutationObserver attivato sulla tabella risultati');
+    } else {
+        console.warn('Tabella risultati non trovata, fallback a polling URL');
+        // Fallback: polling URL ogni 500ms (più conservativo)
+        setInterval(function() {
+            var currentUrl = location.href;
+            if (currentUrl !== lastUrl) {
+                console.log('URL cambiata (fallback polling), riapplico filtro mappa');
+                lastUrl = currentUrl;
+                if (allComuniData) {
+                    filterAndDisplayComuni();
+                }
+            }
+        }, 500);
+    }
+
+    // Ascolta anche eventi popstate (back/forward del browser)
+    window.addEventListener('popstate', function() {
+        console.log('Popstate event, riapplico filtro mappa');
+        if (allComuniData) {
+            filterAndDisplayComuni();
+        }
+    });
+
+    // Inizializza quando il DOM è pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
+})();
+</script>
+{% endblock %}

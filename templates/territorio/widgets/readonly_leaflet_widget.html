@@ -1,0 +1,73 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'css/leaflet_unfold_theme.css' %}" />
+{% if codice_istat %}
+    <div id="map-{{ codice_istat }}" class="comune-detail-map"></div>
+{% else %}
+    <div id="map-{{ id }}" class="comune-detail-map"></div>
+{% endif %}
+
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<script>
+(function() {
+    var mapId = {% if codice_istat %}'map-{{ codice_istat }}'{% else %}'map-{{ id }}'{% endif %};
+
+    // Aspetta che il DOM sia pronto
+    function initMap() {
+        var mapElement = document.getElementById(mapId);
+        if (!mapElement) {
+            setTimeout(initMap, 100);
+            return;
+        }
+
+        // Inizializza la mappa
+        var map = L.map(mapId).setView([45.0, 7.6], 8);
+
+        // Aggiungi tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Aggiungi la geometria del comune se disponibile
+        {% if geojson %}
+        var geojsonFeature = {{ geojson|safe }};
+        var layer = L.geoJSON(geojsonFeature, {
+            style: {
+                fillColor: '#3b82f6',
+                weight: 2,
+                opacity: 1,
+                color: '#1e40af',
+                fillOpacity: 0.3
+            }
+        }).addTo(map);
+
+        // Auto-zoom sui confini
+        if (layer.getBounds().isValid()) {
+            map.fitBounds(layer.getBounds(), {
+                padding: [50, 50],
+                maxZoom: 11
+            });
+        }
+
+        // Aggiungi popup
+        var popupContent = '<h3>{{ nome|default:"Comune" }}</h3>';
+        {% if provincia %}
+        popupContent += '<p><strong>Provincia:</strong> {{ provincia }}</p>';
+        {% endif %}
+        {% if codice_istat %}
+        popupContent += '<p><strong>Codice ISTAT:</strong> {{ codice_istat }}</p>';
+        {% endif %}
+
+        layer.bindPopup(popupContent);
+        {% endif %}
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
+})();
+</script>

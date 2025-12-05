@@ -60,6 +60,7 @@ THIRD_PARTY_APPS = [
     "admin_honeypot",
     # ⚠️ TORNIAMO AL NOME COMPLETO PERCHÉ È NECESSARIO
     "location_field.apps.DefaultConfig",
+    "leaflet",
     "simple_history",
     "concurrency",
     "drf_yasg",
@@ -148,3 +149,29 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- LEAFLET CONFIGURATION ---
+LEAFLET_CONFIG = {
+    "DEFAULT_CENTER": (45.0, 7.6),  # Centro sul Piemonte
+    "DEFAULT_ZOOM": 8,
+    "MIN_ZOOM": 7,
+    "MAX_ZOOM": 18,
+    "SCALE": "both",
+    "ATTRIBUTION_PREFIX": "Powered by django-leaflet",
+    "TILES": [
+        (
+            "OpenStreetMap",
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                "maxZoom": 19,
+            },
+        ),
+    ],
+    "SPATIAL_EXTENT": (6.0, 43.5, 9.5, 46.5),  # Confini Piemonte approssimativi
+    "PLUGINS": {
+        "forms": {
+            "auto-include": True,
+        },
+    },
+}
