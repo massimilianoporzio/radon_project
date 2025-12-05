@@ -7,13 +7,28 @@ on:
     branches: ["main"]
 
 env:
-  # Queste variabili valgono per tutti gli step
   DJANGO_SECRET_KEY: "chiave-finta-per-la-ci-non-usare-in-produzione"
   DJANGO_DEBUG: "False"
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    # Servizio PostgreSQL con PostGIS
+    services:
+      postgres:
+        image: postgis/postgis:14-3.3
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: ci_test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - uses: actions/checkout@v6
@@ -24,8 +39,7 @@ jobs:
       - name: Set up Python
         run: uv python install
 
-      # --- 1. INSTALLAZIONE LIBRERIE GIS DI SISTEMA ---
-      # Queste sono necessarie perché il runner non le ha di default (GDAL, GEOS, PROJ)
+      # INSTALLAZIONE LIBRERIE GIS DI SISTEMA
       - name: Install System Dependencies (GDAL/GEOS/PROJ)
         run: |
           sudo apt-get update
@@ -34,7 +48,7 @@ jobs:
       - name: Install Python Dependencies
         run: uv sync --all-extras --dev
 
-      # --- 2. AUDIT DI SICUREZZA ---
+      # AUDIT DI SICUREZZA
       - name: Run Security Audit (pip-audit)
         run: uv run pip-audit
 
@@ -44,26 +58,24 @@ jobs:
       - name: Run Ruff (Formatting Check)
         run: uv run ruff format --check .
 
-      # --- 3. ESECUZIONE TEST CON SQLite ---
-      - name: Run Tests with Coverage (SQLite)
+      # ESECUZIONE TEST SU POSTGIS
+      - name: Run Tests with Coverage (PostGIS)
         env:
           DJANGO_SETTINGS_MODULE: config.settings.local
-          DATABASE_URL: sqlite:///test_db.sqlite3
+          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_test_db
         run: |
-          # 1. Eseguiamo le migrazioni
           uv run python manage.py migrate --noinput
 
-          # 2. Verifica che la vista ComuneCompleto sia stata creata (se su PostgreSQL)
-          echo "🔍 Verifico models..."
+          # Verifica che la vista ComuneCompleto sia stata creata
           uv run python manage.py shell -c "
-          from territorio.models import ComuneCompleto, ComuneArpa
-          print('✅ Models importati correttamente')
+          from territorio.models import ComuneCompleto
+          count = ComuneCompleto.objects.count()
+          print(f'✅ Vista ComuneCompleto creata (records: {count})')
           "
 
-          # 3. Lanciamo i test con coverage
           uv run pytest --cov=territorio --cov=users --cov-report=term-missing --cov-report=html
 
-      # --- 4. UPLOAD COVERAGE REPORT ---
+      # UPLOAD COVERAGE REPORT
       - name: Upload Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
