@@ -58,6 +58,14 @@ jobs:
       - name: Run Ruff (Formatting Check)
         run: uv run ruff format --check .
 
+      # Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U ci_user; do
+            echo 'Waiting for PostgreSQL...'
+            sleep 1
+          done
+
       # Abilita PostGIS nel database di test
       - name: Enable PostGIS Extension
         env:
@@ -65,6 +73,15 @@ jobs:
         run: |
           psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
           psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;"
+          psql -h localhost -U ci_user -d ci_test_db -c "SELECT postgis_version();"
+
+      # Verifica estensioni installate
+      - name: Verify PostGIS Extensions
+        env:
+          PGPASSWORD: ci_password
+        run: |
+          echo "Checking installed extensions..."
+          psql -h localhost -U ci_user -d ci_test_db -c "\dx"
 
       # ESECUZIONE TEST SU POSTGIS
       - name: Run Tests with Coverage (PostGIS)
