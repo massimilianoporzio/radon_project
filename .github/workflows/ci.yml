@@ -58,6 +58,14 @@ jobs:
       - name: Run Ruff (Formatting Check)
         run: uv run ruff format --check .
 
+      # Abilita PostGIS nel database di test
+      - name: Enable PostGIS Extension
+        env:
+          PGPASSWORD: ci_password
+        run: |
+          psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+          psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;"
+
       # ESECUZIONE TEST SU POSTGIS
       - name: Run Tests with Coverage (PostGIS)
         env:
