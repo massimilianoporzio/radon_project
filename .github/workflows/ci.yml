@@ -66,22 +66,14 @@ jobs:
             sleep 1
           done
 
-      # Abilita PostGIS nel database di test
-      - name: Enable PostGIS Extension
+      # Enable PostGIS on template1 database so new databases inherit it
+      - name: Enable PostGIS on Template Database
         env:
-          PGPASSWORD: ci_password
+          PGPASSWORD: postgres
         run: |
-          psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-          psql -h localhost -U ci_user -d ci_test_db -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;"
-          psql -h localhost -U ci_user -d ci_test_db -c "SELECT postgis_version();"
-
-      # Verifica estensioni installate
-      - name: Verify PostGIS Extensions
-        env:
-          PGPASSWORD: ci_password
-        run: |
-          echo "Checking installed extensions..."
-          psql -h localhost -U ci_user -d ci_test_db -c "\dx"
+          psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+          psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;"
+          echo "✅ PostGIS enabled on template1 database"
 
       # ESECUZIONE TEST SU POSTGIS
       - name: Run Tests with Coverage (PostGIS)
