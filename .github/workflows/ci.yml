@@ -19,13 +19,13 @@ jobs:
     # Avvia un container Docker con PostGIS accanto al runner.
     services:
       postgres:
-        image: postgis/postgis:14-3.3 # Versione più stabile (fallback da 15-3.3)
+        image: postgres:15-alpine # Alpine è più leggero da pullare
         env:
           POSTGRES_USER: ci_user
           POSTGRES_PASSWORD: ci_password
           POSTGRES_DB: ci_test_db
         ports:
-          - 5432:5432 # Espone la porta
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -43,10 +43,10 @@ jobs:
 
       # --- 2. INSTALLAZIONE LIBRERIE GIS DI SISTEMA ---
       # Queste sono necessarie perché il runner non le ha di default (GDAL, GEOS, PROJ)
-      - name: Install System Dependencies (GDAL/GEOS/PROJ)
+      - name: Install System Dependencies (GDAL/GEOS/PROJ/PostGIS)
         run: |
           sudo apt-get update
-          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev libgeos-dev
+          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev libgeos-dev postgresql-15-postgis
 
       - name: Install Python Dependencies
         # uv sync installerà anche psycopg per connettersi al container
