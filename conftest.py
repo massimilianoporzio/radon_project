@@ -1,33 +1,33 @@
 """
 pytest configuration for Django GIS testing with PostGIS support.
 
-This file enables PostGIS extensions in the test database after creation.
+This file enables PostGIS extensions in the test database BEFORE migrations.
 """
 
-from django.db import connection
 from django.db.backends.postgresql.base import DatabaseCreation
 
 
 def pytest_configure():
-    """Patch Django's test database creation to enable PostGIS."""
-    original_create_test_db = DatabaseCreation.create_test_db
+    """Patch Django's test database creation to enable PostGIS before migrations."""
+    original_create_test_db = DatabaseCreation._create_test_db
 
-    def create_test_db_with_postgis(self, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
-        """Create test database and enable PostGIS extensions."""
-        test_db_name = original_create_test_db(self, verbosity, autoclobber, serialize, keepdb)
+    def _create_test_db_with_postgis(self, verbosity, autoclobber, keepdb=False):
+        """Create test database and immediately enable PostGIS BEFORE migrations."""
+        # Call the original method to create the database
+        original_create_test_db(self, verbosity, autoclobber, keepdb)
 
-        # Enable PostGIS extensions in the newly created test database
+        # Enable PostGIS extensions IMMEDIATELY after database creation
+        # This happens BEFORE any migrations are run
         try:
-            with connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
                 cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
             if verbosity >= 2:
-                print("\n✅ PostGIS extensions enabled in test database")
+                test_db_name = self.connection.settings_dict["NAME"]
+                print(f"\n✅ PostGIS extensions enabled in test database '{test_db_name}'")
         except Exception as e:
             if verbosity >= 1:
                 print(f"\n⚠️  PostGIS extension warning: {e}")
 
-        return test_db_name
-
-    # Monkey-patch the method
-    DatabaseCreation.create_test_db = create_test_db_with_postgis
+    # Monkey-patch the internal method that creates the database
+    DatabaseCreation._create_test_db = _create_test_db_with_postgis
