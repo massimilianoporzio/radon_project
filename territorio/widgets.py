@@ -36,7 +36,11 @@ class ReadOnlyLeafletWidget(LeafletWidget):
         if attrs is None:
             attrs = {}
         attrs["readonly"] = "readonly"
-        attrs["style"] = "pointer-events: none; opacity: 0.6;"
+        # Use clearer visual indicators similar to disabled fields:
+        # reduced opacity, background color change, and disabled cursor
+        attrs["style"] = (
+            "pointer-events: none; opacity: 0.65; background-color: #f5f5f5; cursor: not-allowed; border-color: #ccc;"
+        )
 
         # Se il contesto è fornito (tramite data-* attrs), usalo per il template
         if context is None:

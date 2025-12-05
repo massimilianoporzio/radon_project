@@ -1,8 +1,11 @@
 import json
+import logging
 
 from django.contrib.auth.decorators import login_required
-from django.db import connection
+from django.db import DatabaseError, connection
 from django.http import JsonResponse
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -12,7 +15,15 @@ def comuni_geojson(request):
     Il filtro per provincia viene gestito client-side per evitare ricaricamenti.
     La semplificazione avviene a livello database con PostGIS per performance ottimali.
     """
-    tolerance = float(request.GET.get("simplify", "0.001"))
+    # Validate and constrain tolerance parameter to safe range [0.0001, 0.01]
+    # This prevents performance issues from excessive simplification values
+    try:
+        tolerance = float(request.GET.get("simplify", "0.001"))
+    except (TypeError, ValueError):
+        tolerance = 0.001
+
+    # Constrain tolerance to safe range to prevent DoS or performance degradation
+    tolerance = max(0.0001, min(tolerance, 0.01))
 
     # Query SQL diretta con PostGIS per semplificazione veloce
     # Include media radon e area prioritaria tramite LEFT JOIN
@@ -34,33 +45,49 @@ def comuni_geojson(request):
         ORDER BY nome
     """
 
-    with connection.cursor() as cursor:
-        cursor.execute(sql, [tolerance])
-        rows = cursor.fetchall()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql, [tolerance])
+            rows = cursor.fetchall()
+    except DatabaseError as e:
+        logger.error(f"Database error fetching comuni GeoJSON: {e}")
+        return JsonResponse({"error": "Failed to fetch geographic data"}, status=500)
 
     features = []
     for row in rows:
-        codice_istat, nome, provincia, media_radon, area_prioritaria, geom_json = row
+        try:
+            codice_istat, nome, provincia, media_radon, area_prioritaria, geom_json = row
 
-        # Salta se la geometria è ancora NULL (non dovrebbe succedere con il WHERE)
-        if not geom_json:
+            # Skip if geometry is NULL (should not happen due to WHERE clause)
+            if not geom_json:
+                logger.warning(f"Null geometry for comune {nome}")
+                continue
+
+            # Parse GeoJSON geometry
+            try:
+                geometry = json.loads(geom_json)
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Invalid geometry JSON for comune {nome}: {e}")
+                continue
+
+            # Format media radon for cleaner display
+            media_radon_formatted = round(media_radon, 1) if media_radon is not None else None
+
+            features.append(
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "codice_istat": codice_istat,
+                        "nome": nome,
+                        "provincia": provincia,
+                        "media_radon": media_radon_formatted,
+                        "area_prioritaria": area_prioritaria or "N/D",
+                    },
+                    "geometry": geometry,
+                }
+            )
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error processing row data: {e}")
             continue
-
-        # Formatta la media radon per una visualizzazione più pulita
-        media_radon_formatted = round(media_radon, 1) if media_radon is not None else None
-
-        features.append(
-            {
-                "type": "Feature",
-                "properties": {
-                    "codice_istat": codice_istat,
-                    "nome": nome,
-                    "provincia": provincia,
-                    "media_radon": media_radon_formatted,
-                    "area_prioritaria": area_prioritaria or "N/D",
-                },
-                "geometry": json.loads(geom_json),
-            }
-        )
 
     return JsonResponse({"type": "FeatureCollection", "features": features})
