@@ -2,12 +2,16 @@
 
 <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
 <link rel="stylesheet" href="{% static 'css/leaflet_unfold_theme.css' %}" />
-<div id="map-{{ codice_istat }}" class="comune-detail-map"></div>
+{% if codice_istat %}
+    <div id="map-{{ codice_istat }}" class="comune-detail-map"></div>
+{% else %}
+    <div id="map-{{ id }}" class="comune-detail-map"></div>
+{% endif %}
 
 <script src="{% static 'leaflet/leaflet.js' %}"></script>
 <script>
 (function() {
-    var mapId = 'map-{{ codice_istat }}';
+    var mapId = {% if codice_istat %}'map-{{ codice_istat }}'{% else %}'map-{{ id }}'{% endif %};
 
     // Aspetta che il DOM sia pronto
     function initMap() {
@@ -26,7 +30,8 @@
             maxZoom: 19
         }).addTo(map);
 
-        // Aggiungi la geometria del comune
+        // Aggiungi la geometria del comune se disponibile
+        {% if geojson %}
         var geojsonFeature = {{ geojson|safe }};
         var layer = L.geoJSON(geojsonFeature, {
             style: {
@@ -47,11 +52,16 @@
         }
 
         // Aggiungi popup
-        layer.bindPopup(
-            '<h3>{{ nome }}</h3>' +
-            '<p><strong>Provincia:</strong> {{ provincia }}</p>' +
-            '<p><strong>Codice ISTAT:</strong> {{ codice_istat }}</p>'
-        );
+        var popupContent = '<h3>{{ nome|default:"Comune" }}</h3>';
+        {% if provincia %}
+        popupContent += '<p><strong>Provincia:</strong> {{ provincia }}</p>';
+        {% endif %}
+        {% if codice_istat %}
+        popupContent += '<p><strong>Codice ISTAT:</strong> {{ codice_istat }}</p>';
+        {% endif %}
+
+        layer.bindPopup(popupContent);
+        {% endif %}
     }
 
     if (document.readyState === 'loading') {

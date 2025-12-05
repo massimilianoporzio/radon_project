@@ -242,11 +242,72 @@
 <script src="{% static 'leaflet/leaflet.js' %}"></script>
 <script>
 (function() {
+    // Costante per versione cache - incrementa quando cambia la struttura dati
+    var CACHE_VERSION = '2.0';
+
+    // Soglie radon dal backend (fonte unica di verità)
+    var RADON_THRESHOLD_HIGH = {{ radon_threshold_high }};    // {{ radon_threshold_high }} Bq/m³
+    var RADON_THRESHOLD_MEDIUM = {{ radon_threshold_medium }}; // {{ radon_threshold_medium }} Bq/m³
+
+    // URL base admin dal backend (evita hardcoding)
+    var ADMIN_BASE_URL = '{{ admin_base_url }}';
+
     var map;
     var comuniLayer;
     var loader = document.getElementById('map-loader');
     var allComuniData = null; // Cache dei dati
     var lastProvinciaFilter = undefined; // Ultimo filtro applicato (undefined = non ancora inizializzato)
+
+    /**
+     * Centralizza la logica dei colori per area prioritaria.
+     * Mantiene coerenza con territorio/utils.py::get_area_prioritaria_badge_class
+     * @param {string} areaPrioritaria - es. "Aree prioritarie", "Aree attenzionate", etc.
+     * @returns {object} - { badgeClass, fillColor, borderColor, fillOpacity }
+     */
+    function getAreaPrioritariaColors(areaPrioritaria) {
+        var defaultColors = {
+            badgeClass: 'badge-default',
+            fillColor: '#93c5fd',    // azzurro chiaro
+            borderColor: '#60a5fa',
+            fillOpacity: 0.2
+        };
+
+        if (!areaPrioritaria || areaPrioritaria === 'N/D') {
+            return defaultColors;
+        }
+
+        var apLower = areaPrioritaria.toLowerCase();
+
+        // Prioritaria (rosso) - ma NON "non prioritaria"
+        if (apLower.includes('prioritari') && !apLower.includes('non')) {
+            return {
+                badgeClass: 'badge-danger',
+                fillColor: '#fca5a5',   // rosso chiaro
+                borderColor: '#ef4444',
+                fillOpacity: 0.4
+            };
+        }
+        // Attenzionata (arancione)
+        if (apLower.includes('attenzione')) {
+            return {
+                badgeClass: 'badge-warning',
+                fillColor: '#fcd34d',   // giallo/arancio
+                borderColor: '#f59e0b',
+                fillOpacity: 0.35
+            };
+        }
+        // Non prioritaria (verde)
+        if (apLower.includes('non prioritari')) {
+            return {
+                badgeClass: 'badge-success',
+                fillColor: '#86efac',   // verde chiaro
+                borderColor: '#22c55e',
+                fillOpacity: 0.25
+            };
+        }
+
+        return defaultColors;
+    }
 
     // Inizializza la mappa
     function initMap() {
@@ -302,10 +363,9 @@
         try {
             var cachedData = sessionStorage.getItem('comuni_geojson_cache');
             var cacheVersion = sessionStorage.getItem('comuni_cache_version');
-            var currentVersion = '2.0'; // Incrementa quando cambia la struttura dati
 
-            if (cachedData && cacheVersion === currentVersion) {
-                console.log('Caricamento da cache sessionStorage (v' + currentVersion + ')');
+            if (cachedData && cacheVersion === CACHE_VERSION) {
+                console.log('Caricamento da cache sessionStorage (v' + CACHE_VERSION + ')');
                 allComuniData = JSON.parse(cachedData);
 
                 // Valida che abbia la struttura corretta
@@ -320,7 +380,7 @@
                         sessionStorage.removeItem('comuni_cache_version');
                     }
                 }
-            } else if (cachedData && cacheVersion !== currentVersion) {
+            } else if (cachedData && cacheVersion !== CACHE_VERSION) {
                 console.log('Cache obsoleta (v' + cacheVersion + '), svuoto e ricarico');
                 sessionStorage.removeItem('comuni_geojson_cache');
                 sessionStorage.removeItem('comuni_cache_version');
@@ -343,10 +403,9 @@
                 // Prova a salvare anche in sessionStorage (se non troppo grande)
                 try {
                     var jsonString = JSON.stringify(data);
-                    var currentVersion = '2.0';
                     sessionStorage.setItem('comuni_geojson_cache', jsonString);
-                    sessionStorage.setItem('comuni_cache_version', currentVersion);
-                    console.log('Salvato in cache sessionStorage v' + currentVersion + ' (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
+                    sessionStorage.setItem('comuni_cache_version', CACHE_VERSION);
+                    console.log('Salvato in cache sessionStorage v' + CACHE_VERSION + ' (' + (jsonString.length / 1024).toFixed(0) + ' KB)');
                 } catch (e) {
                     console.warn('Impossibile salvare in sessionStorage (troppo grande?):', e);
                     // Non è un errore critico, funziona comunque con cache memoria
@@ -444,9 +503,9 @@
         // Media Radon
         if (props.media_radon !== null) {
             var radonClass;
-            if (props.media_radon > 300) {
+            if (props.media_radon > RADON_THRESHOLD_HIGH) {
                 radonClass = 'badge-danger';
-            } else if (props.media_radon > 200) {
+            } else if (props.media_radon > RADON_THRESHOLD_MEDIUM) {
                 radonClass = 'badge-warning';
             } else {
                 radonClass = 'badge-success';
@@ -460,18 +519,9 @@
         // Area Prioritaria
         if (props.area_prioritaria && props.area_prioritaria !== 'N/D') {
             var apText = props.area_prioritaria;
-            var apClass;
-            if (apText.toLowerCase().includes('non prioritari')) {
-                apClass = 'badge-success';
-            } else if (apText.toLowerCase().includes('attenzione')) {
-                apClass = 'badge-warning';
-            } else if (apText.toLowerCase().includes('prioritari')) {
-                apClass = 'badge-danger';
-            } else {
-                apClass = 'badge-default';
-            }
+            var colors = getAreaPrioritariaColors(apText);
             content += '<p class="popup-text"><strong>Piano Radon:</strong> ' +
-                      '<span class="badge ' + apClass + '">' + apText + '</span></p>';
+                      '<span class="badge ' + colors.badgeClass + '">' + apText + '</span></p>';
         } else {
             content += '<p class="popup-muted"><strong>Piano Radon:</strong> <em>Dato non disponibile</em></p>';
         }
@@ -480,7 +530,7 @@
         content += '<p class="popup-small"><strong>Codice ISTAT:</strong> ' + (props.codice_istat || 'N/D') + '</p>';
 
         if (props.codice_istat) {
-            var detailUrl = '/secret-admin/territorio/comunearpa/' + props.codice_istat + '/change/' + window.location.search;
+            var detailUrl = ADMIN_BASE_URL + '/' + props.codice_istat + '/change/' + window.location.search;
             content += '<p class="popup-button-wrapper"><a href="' + detailUrl + '" class="popup-button">📊 Visualizza dettagli completi</a></p>';
         }
 
@@ -494,42 +544,25 @@
             smoothFactor: 2.0,
             style: function(feature) {
                 var props = feature.properties;
-                var fillColor = '#93c5fd'; // azzurro chiaro default
-                var borderColor = '#60a5fa';
-                var fillOpacity = 0.2;
-
-                // Colora in base all'area prioritaria
-                if (props.area_prioritaria && props.area_prioritaria !== 'N/D') {
-                    var apText = props.area_prioritaria.toLowerCase();
-
-                    if (apText.includes('non prioritari')) {
-                        // Verde - sicuro
-                        fillColor = '#86efac';
-                        borderColor = '#22c55e';
-                        fillOpacity = 0.25;
-                    } else if (apText.includes('attenzione')) {
-                        // Giallo/arancio - attenzione
-                        fillColor = '#fcd34d';
-                        borderColor = '#f59e0b';
-                        fillOpacity = 0.35;
-                    } else if (apText.includes('prioritari')) {
-                        // Rosso - rischio alto
-                        fillColor = '#fca5a5';
-                        borderColor = '#ef4444';
-                        fillOpacity = 0.4;
-                    }
-                }
+                var colors = getAreaPrioritariaColors(props.area_prioritaria);
 
                 return {
-                    fillColor: fillColor,
+                    fillColor: colors.fillColor,
                     weight: 1,
                     opacity: 0.7,
-                    color: borderColor,
-                    fillOpacity: fillOpacity
+                    color: colors.borderColor,
+                    fillOpacity: colors.fillOpacity
                 };
             },
             onEachFeature: function(feature, layer) {
                 var props = feature.properties;
+                var colors = getAreaPrioritariaColors(props.area_prioritaria);
+
+                // Salva lo stile originale per poter ripristinarlo al mouseout
+                layer._originalStyle = {
+                    fillOpacity: colors.fillOpacity,
+                    weight: 1
+                };
 
                 // Protezione contro dati mancanti o undefined
                 if (!props || !props.nome) {
@@ -559,9 +592,10 @@
                 });
 
                 layer.on('mouseout', function(e) {
+                    // Ripristina lo stile originale (mantiene la distinzione visuale tra aree)
                     e.target.setStyle({
-                        fillOpacity: 0.25,
-                        weight: 1
+                        fillOpacity: e.target._originalStyle.fillOpacity,
+                        weight: e.target._originalStyle.weight
                     });
                 });
             }
@@ -579,20 +613,48 @@
         }
     }
 
-    // Intercetta i cambiamenti nella URL (quando Unfold applica i filtri)
+    // Intercetta i cambiamenti nella URL e nel DOM (quando Unfold applica i filtri)
     var lastUrl = location.href;
 
-    // Controlla ogni 200ms se l'URL è cambiata (dopo click sui filtri)
-    setInterval(function() {
-        var currentUrl = location.href;
-        if (currentUrl !== lastUrl) {
-            console.log('URL cambiata, riapplico filtro mappa');
-            lastUrl = currentUrl;
-            if (allComuniData) {
-                filterAndDisplayComuni();
+    // MutationObserver: osserva quando Unfold ricarica la tabella
+    var resultList = document.querySelector('#result_list, .results, [role="table"]');
+    if (resultList) {
+        var observer = new MutationObserver(function(mutations) {
+            // Controlla se l'URL è cambiata
+            var currentUrl = location.href;
+
+            if (currentUrl !== lastUrl) {
+                console.log('Rilevato cambiamento filtri, riapplico filtro mappa');
+                lastUrl = currentUrl;
+
+                if (allComuniData) {
+                    filterAndDisplayComuni();
+                }
             }
-        }
-    }, 200);
+        });
+
+        // Osserva modifiche alla tabella risultati (Unfold la ricarica via AJAX)
+        observer.observe(resultList, {
+            childList: true,    // Osserva aggiunta/rimozione figli
+            subtree: true,      // Osserva anche i discendenti
+            attributes: false   // Non serve osservare attributi
+        });
+
+        console.log('MutationObserver attivato sulla tabella risultati');
+    } else {
+        console.warn('Tabella risultati non trovata, fallback a polling URL');
+        // Fallback: polling URL ogni 500ms (più conservativo)
+        setInterval(function() {
+            var currentUrl = location.href;
+            if (currentUrl !== lastUrl) {
+                console.log('URL cambiata (fallback polling), riapplico filtro mappa');
+                lastUrl = currentUrl;
+                if (allComuniData) {
+                    filterAndDisplayComuni();
+                }
+            }
+        }, 500);
+    }
 
     // Ascolta anche eventi popstate (back/forward del browser)
     window.addEventListener('popstate', function() {

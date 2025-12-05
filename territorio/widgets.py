@@ -17,7 +17,7 @@ class ReadOnlyLeafletWidget(LeafletWidget):
             "map_srid": 4326,
         }
         if attrs:
-            default_attrs.update(attrs)
+            default_attrs |= attrs
         super().__init__(attrs=default_attrs)
 
     class Media:
@@ -30,7 +30,7 @@ class ReadOnlyLeafletWidget(LeafletWidget):
             "leaflet/leaflet.forms.js",
         )
 
-    def render(self, name, value, attrs=None, renderer=None):
+    def render(self, name, value, attrs=None, renderer=None, context=None):
         """Renderizza il widget in modalità read-only"""
         # Aggiungi classe per nascondere i controlli di editing
         if attrs is None:
@@ -38,11 +38,18 @@ class ReadOnlyLeafletWidget(LeafletWidget):
         attrs["readonly"] = "readonly"
         attrs["style"] = "pointer-events: none; opacity: 0.6;"
 
+        # Se il contesto è fornito (tramite data-* attrs), usalo per il template
+        if context is None:
+            context = {}
+
+        # Assicura che il contesto abbia le variabili necessarie
+        field_id = attrs.get("id", f"id_{name}")
+        context.setdefault("id", field_id)
+
         # Renderizza il widget base di Leaflet
         html = super().render(name, value, attrs, renderer)
 
         # Aggiungi lo script di auto-zoom e read-only dal template
-        field_id = attrs.get("id", f"id_{name}")
-        script_html = render_to_string(self.template_name, {"id": field_id})
+        script_html = render_to_string(self.template_name, context)
 
         return html + script_html

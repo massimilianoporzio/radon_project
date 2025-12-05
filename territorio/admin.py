@@ -1,10 +1,16 @@
 from django.contrib import admin
 from django.template.loader import render_to_string
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from leaflet.admin import LeafletGeoAdmin
 from unfold.admin import ModelAdmin
 
 from .models import AreaPrioritariaRadon, ComuneArpa, ComuneCompleto
+from .utils import (
+    RADON_THRESHOLD_HIGH,
+    RADON_THRESHOLD_MEDIUM,
+    get_area_prioritaria_badge_class,
+)
 
 
 # Filtri personalizzati per dati mancanti
@@ -46,6 +52,23 @@ class UnfoldLeafletGeoAdmin(ModelAdmin, LeafletGeoAdmin):
 class ComuneArpaAdmin(UnfoldLeafletGeoAdmin):
     # Template personalizzato per la lista con mappa
     change_list_template = "admin/territorio/comunearpa/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        """Override per iniettare le soglie radon e l'URL base admin nel template JavaScript."""
+        extra_context = extra_context or {}
+
+        # URL base per i dettagli comuni (es: /secret-admin/territorio/comunearpa/)
+        admin_base_url = request.path.rstrip("/")
+
+        extra_context.update(
+            {
+                "radon_threshold_high": RADON_THRESHOLD_HIGH,
+                "radon_threshold_medium": RADON_THRESHOLD_MEDIUM,
+                "admin_base_url": admin_base_url,
+            }
+        )
+        return super().changelist_view(request, extra_context)
+
     change_form_template = "admin/territorio/comunearpa/change_form.html"
 
     # Colonne che vedrai nella lista
@@ -101,7 +124,17 @@ class ComuneArpaAdmin(UnfoldLeafletGeoAdmin):
     )
 
     def get_object(self, request, object_id, from_field=None):
-        """Override per fare cache del comune completo ed evitare query multiple"""
+        """
+        Override per pre-caricare i dati completi dal modello ComuneCompleto.
+
+        Side Effects:
+            Imposta l'attributo `_cached_comune_completo` sull'oggetto ComuneArpa recuperato.
+            Questo cache viene poi riutilizzato dai metodi display (area_prioritaria_display,
+            dati_geologici_display) per evitare query duplicate alla VIEW comuni_completi.
+
+        Returns:
+            ComuneArpa: L'oggetto richiesto con il cache _cached_comune_completo impostato.
+        """
         obj = super().get_object(request, object_id, from_field)
         if obj:
             # Carica subito i dati completi e li mette in cache sull'oggetto
@@ -122,16 +155,8 @@ class ComuneArpaAdmin(UnfoldLeafletGeoAdmin):
 
         ap = comune_completo.area_prioritaria if comune_completo else None
 
-        # Determina il colore del badge in base alla priorità
-        badge_class = "bg-gray-500 text-white dark:bg-gray-600"  # default
-        if ap:
-            ap_lower = ap.lower()
-            if "prioritari" in ap_lower and "non" not in ap_lower:
-                badge_class = "bg-red-600 text-white"
-            elif "attenzione" in ap_lower:
-                badge_class = "bg-amber-500 text-white"
-            elif "non prioritari" in ap_lower:
-                badge_class = "bg-emerald-600 text-white"
+        # Determina il colore del badge usando la utility condivisa
+        badge_class = get_area_prioritaria_badge_class(ap)
 
         context = {"area_prioritaria": ap, "badge_class": badge_class}
         return mark_safe(render_to_string("territorio/admin/area_prioritaria_badge.html", context))
@@ -167,10 +192,10 @@ class ComuneArpaAdmin(UnfoldLeafletGeoAdmin):
         if obj.media_radon is None:
             return mark_safe('<span style="color: #9ca3af;">N/D</span>')
 
-        # Colori basati sui livelli di concentrazione
-        if obj.media_radon > 300:
+        # Colori basati sui livelli di concentrazione (soglie centralizzate)
+        if obj.media_radon > RADON_THRESHOLD_HIGH:
             color = "#dc2626"  # rosso
-        elif obj.media_radon > 200:
+        elif obj.media_radon > RADON_THRESHOLD_MEDIUM:
             color = "#f59e0b"  # arancione
         else:
             color = "#10b981"  # verde
@@ -238,31 +263,12 @@ class AreaPrioritariaRadonAdmin(UnfoldLeafletGeoAdmin):
     def area_prioritaria_display(self, obj):
         """Formattazione dell'area prioritaria con badge colorato"""
         if not obj.area_prioritaria or obj.area_prioritaria == "N/D":
-            return mark_safe('<span style="color: #9ca3af; font-style: italic;">Non disponibile</span>')
+            return format_html('<span class="text-gray-400 dark:text-gray-500 italic">{}</span>', "Non disponibile")
 
-        # Colori basati sulla classificazione
-        ap_lower = obj.area_prioritaria.lower()
-        if "prioritari" in ap_lower and "non" not in ap_lower:
-            # Aree prioritarie
-            bg_color = "#dc2626"
-            text = obj.area_prioritaria
-        elif "attenzione" in ap_lower:
-            # Aree di attenzione
-            bg_color = "#f59e0b"
-            text = obj.area_prioritaria
-        elif "non prioritari" in ap_lower:
-            # Aree non prioritarie
-            bg_color = "#10b981"
-            text = obj.area_prioritaria
-        else:
-            # Default
-            bg_color = "#6b7280"
-            text = obj.area_prioritaria
+        # Badge con Tailwind CSS usando la utility condivisa
+        badge_class = get_area_prioritaria_badge_class(obj.area_prioritaria)
 
-        return mark_safe(
-            f'<span style="background-color: {bg_color}; color: white; '
-            f'padding: 2px 8px; border-radius: 4px; font-weight: bold;">{text}</span>'
-        )
+        return format_html('<span class="px-2 py-1 rounded text-xs font-bold {}">{}</span>', badge_class, obj.area_prioritaria)
 
     area_prioritaria_display.short_description = "Piano Radon"
 
