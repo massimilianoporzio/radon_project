@@ -9,6 +9,8 @@ on:
 env:
   DJANGO_SECRET_KEY: "chiave-finta-per-la-ci-non-usare-in-produzione"
   DJANGO_DEBUG: "False"
+  # Password generata per il database di test CI (non usata in produzione)
+  CI_DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'test_password_for_ci_only_12345' }}
 
 jobs:
   build-and-test:
@@ -20,7 +22,7 @@ jobs:
         image: postgis/postgis:14-3.3
         env:
           POSTGRES_USER: ci_user
-          POSTGRES_PASSWORD: ci_password
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'test_password_for_ci_only_12345' }}
           POSTGRES_DB: ci_test_db
         options: >-
           --health-cmd pg_isready
@@ -79,7 +81,7 @@ jobs:
       - name: Run Tests with Coverage (PostGIS)
         env:
           DJANGO_SETTINGS_MODULE: config.settings.local
-          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_test_db
+          DATABASE_URL: postgresql://ci_user:${{ secrets.CI_DB_PASSWORD || 'test_password_for_ci_only_12345' }}@localhost:5432/ci_test_db
         run: |
           uv run python manage.py migrate --noinput
 
