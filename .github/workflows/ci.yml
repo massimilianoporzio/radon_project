@@ -19,7 +19,7 @@ jobs:
     # Avvia un container Docker con PostGIS accanto al runner.
     services:
       postgres:
-        image: postgis/postgis:15-3.3 # Immagine stabile con PostGIS
+        image: postgis/postgis:14-3.3 # Versione più stabile (fallback da 15-3.3)
         env:
           POSTGRES_USER: ci_user
           POSTGRES_PASSWORD: ci_password
