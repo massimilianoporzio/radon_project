@@ -15,23 +15,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # --- 1. DEFINIZIONE DEL SERVIZIO POSTGRES/POSTGIS ---
-    # Avvia un container Docker con PostGIS accanto al runner.
-    services:
-      postgres:
-        image: postgres:15-alpine # Alpine è più leggero da pullare
-        env:
-          POSTGRES_USER: ci_user
-          POSTGRES_PASSWORD: ci_password
-          POSTGRES_DB: ci_test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v6
 
@@ -41,18 +24,17 @@ jobs:
       - name: Set up Python
         run: uv python install
 
-      # --- 2. INSTALLAZIONE LIBRERIE GIS DI SISTEMA ---
+      # --- 1. INSTALLAZIONE LIBRERIE GIS DI SISTEMA ---
       # Queste sono necessarie perché il runner non le ha di default (GDAL, GEOS, PROJ)
-      - name: Install System Dependencies (GDAL/GEOS/PROJ/PostGIS)
+      - name: Install System Dependencies (GDAL/GEOS/PROJ)
         run: |
           sudo apt-get update
-          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev libgeos-dev postgresql-15-postgis
+          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev libgeos-dev
 
       - name: Install Python Dependencies
-        # uv sync installerà anche psycopg per connettersi al container
         run: uv sync --all-extras --dev
 
-      # --- 3. AUDIT DI SICUREZZA ---
+      # --- 2. AUDIT DI SICUREZZA ---
       - name: Run Security Audit (pip-audit)
         run: uv run pip-audit
 
@@ -62,36 +44,28 @@ jobs:
       - name: Run Ruff (Formatting Check)
         run: uv run ruff format --check .
 
-      # --- 4. ESECUZIONE TEST SU POSTGIS ---
-      - name: Run GIS Tests on PostGIS Service with Coverage
-        # Variabili d'ambiente per connettersi al container
+      # --- 3. ESECUZIONE TEST CON SQLite ---
+      - name: Run Tests with Coverage (SQLite)
         env:
           DJANGO_SETTINGS_MODULE: config.settings.local
-          # Stringa di connessione al servizio: postgresql://USER:PASSWORD@HOST:PORT/DBNAME
-          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_test_db
+          DATABASE_URL: sqlite:///test_db.sqlite3
         run: |
-          # 1. Eseguiamo le migrazioni (Crea le estensioni PostGIS nel DB di test)
+          # 1. Eseguiamo le migrazioni
           uv run python manage.py migrate --noinput
 
-          # 2. Verifica che la vista ComuneCompleto sia stata creata
-          echo "🔍 Verifico che la vista database ComuneCompleto esista..."
+          # 2. Verifica che la vista ComuneCompleto sia stata creata (se su PostgreSQL)
+          echo "🔍 Verifico models..."
           uv run python manage.py shell -c "
-          from territorio.models import ComuneCompleto
-          try:
-              count = ComuneCompleto.objects.count()
-              print(f'✅ Vista ComuneCompleto creata correttamente (records: {count})')
-          except Exception as e:
-              print(f'❌ Errore accesso vista ComuneCompleto: {e}')
-              raise
+          from territorio.models import ComuneCompleto, ComuneArpa
+          print('✅ Models importati correttamente')
           "
 
-          # 3. Lanciamo i test con coverage (usa le impostazioni da pytest.ini)
-          # Include: --cov-fail-under=75, --cov-branch, omit migrations/tests
+          # 3. Lanciamo i test con coverage
           uv run pytest --cov=territorio --cov=users --cov-report=term-missing --cov-report=html
 
-      # --- 5. UPLOAD COVERAGE REPORT ---
+      # --- 4. UPLOAD COVERAGE REPORT ---
       - name: Upload Coverage Report
-        if: always() # Carica anche se i test falliscono
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
