@@ -6,8 +6,8 @@ Tests CustomUserAdmin configuration and display methods.
 from django.contrib.admin.sites import AdminSite
 from django.test import SimpleTestCase
 
-from users.admin import CustomUserAdmin
-from users.models import CustomUser
+from apps.users.admin import CustomUserAdmin
+from apps.users.models import CustomUser
 
 
 class CustomUserAdminTest(SimpleTestCase):

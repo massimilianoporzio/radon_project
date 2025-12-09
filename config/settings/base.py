@@ -67,8 +67,8 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "users",
-    "territorio",
+    "apps.users",
+    "apps.territorio",
 ]
 
 # La concatenazione finale è corretta:

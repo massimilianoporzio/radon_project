@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.test import SimpleTestCase
 
-from users.models import CustomUser
+from apps.users.models import CustomUser
 
 # Recuperiamo il modello utente attivo (il tuo CustomUser)
 User = get_user_model()
