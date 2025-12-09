@@ -118,4 +118,4 @@ jobs:
         run: uv sync --group dev
 
       - name: Check Markdown formatting
-        run: uv run mdformat --check --exclude .venv .
+        run: uv run mdformat --check $(find . -name "*.md" -not -path "./.venv/*" -not -path "./staticfiles/*" -not -path "./.git/*")
