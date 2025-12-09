@@ -18,3 +18,9 @@ repos:
         args: [--fix]
       # Esegui il formatter (come Black, ma più veloce)
       - id: ruff-format
+
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.9.0
+    hooks:
+      - id: pip-audit
+        args: [--skip-editable]

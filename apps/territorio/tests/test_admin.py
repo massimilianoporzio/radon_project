@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, Mock, patch
 from django.contrib.admin.sites import AdminSite
 from django.test import SimpleTestCase
 
-from territorio.admin import ComuneArpaAdmin
-from territorio.models import ComuneArpa, ComuneCompleto
+from apps.territorio.admin import ComuneArpaAdmin
+from apps.territorio.models import ComuneArpa, ComuneCompleto
 
 
 class ComuneArpaAdminPermissionsTest(SimpleTestCase):
@@ -62,7 +62,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.admin = ComuneArpaAdmin(ComuneArpa, self.site)
 
     # ===== Test area_prioritaria_display =====
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_no_data(self, mock_get):
         """Testa area_prioritaria_display quando ComuneCompleto non esiste"""
         mock_get.side_effect = ComuneCompleto.DoesNotExist()
@@ -72,7 +72,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIsNotNone(result)
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_with_area_prioritaria(self, mock_get):
         """Testa area_prioritaria_display con area prioritaria presente"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -88,7 +88,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         # Verifica che il badge sia renderizzato
         self.assertIn("bg-", result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_without_area_prioritaria(self, mock_get):
         """Testa area_prioritaria_display senza area prioritaria"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -101,7 +101,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
 
         self.assertIsNotNone(result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_null_ap(self, mock_get):
         """Testa area_prioritaria_display quando area_prioritaria è None"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -114,7 +114,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
 
         self.assertIsNotNone(result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_with_cache(self, mock_get):
         """Testa area_prioritaria_display quando la cache è già presente"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -143,7 +143,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         # Deve avere il badge rosso per "prioritaria"
         self.assertIn("bg-red-600", result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_attenzione(self, mock_get):
         """Testa area_prioritaria_display con testo 'Attenzione'"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -158,7 +158,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         # Deve avere il badge arancione per "attenzione"
         self.assertIn("bg-amber-500", result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_prioritaria_text(self, mock_get):
         """Testa area_prioritaria_display con testo 'Prioritaria'"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -173,7 +173,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         # Deve avere il badge rosso per "prioritaria"
         self.assertIn("bg-red-600", result)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_area_prioritaria_display_prioritari_keyword(self, mock_get):
         """Testa area_prioritaria_display con keyword 'prioritari' (senza 'non')"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -191,7 +191,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIn("Zone Prioritarie", result)
 
     # ===== Test dati_geologici_display =====
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_no_data(self, mock_get):
         """Testa dati_geologici_display quando ComuneCompleto non esiste"""
         mock_get.side_effect = ComuneCompleto.DoesNotExist()
@@ -201,7 +201,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIsNotNone(result)
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_with_full_data(self, mock_get):
         """Testa dati_geologici_display con tutti i dati geologici presenti"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -218,7 +218,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIsNotNone(result)
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_partial_data(self, mock_get):
         """Testa dati_geologici_display con alcuni dati mancanti"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -236,7 +236,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         # Verifica che il template sia renderizzato
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_all_empty(self, mock_get):
         """Testa dati_geologici_display quando tutti i dati sono None"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -255,7 +255,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIsNotNone(result)
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_with_permeability(self, mock_get):
         """Testa dati_geologici_display con dati di permeabilità"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -272,7 +272,7 @@ class ComuneArpaAdminDisplayMethodsTest(SimpleTestCase):
         self.assertIsNotNone(result)
         self.assertGreater(len(result), 0)
 
-    @patch("territorio.admin.ComuneCompleto.objects.get")
+    @patch("apps.territorio.admin.ComuneCompleto.objects.get")
     def test_dati_geologici_display_with_cache(self, mock_get):
         """Testa dati_geologici_display quando la cache è già presente"""
         mock_comune_completo = Mock(spec=ComuneCompleto)
@@ -501,7 +501,7 @@ class DatiMissingFilterTest(SimpleTestCase):
     def setUp(self):
         from django.test import RequestFactory
 
-        from territorio.admin import DatiMissingFilter
+        from apps.territorio.admin import DatiMissingFilter
 
         self.factory = RequestFactory()
         self.request = self.factory.get("/admin/")
@@ -531,7 +531,7 @@ class AreaPrioritariaRadonAdminTest(SimpleTestCase):
     """Test per l'admin AreaPrioritariaRadon"""
 
     def setUp(self):
-        from territorio.admin import AreaPrioritariaRadonAdmin
+        from apps.territorio.admin import AreaPrioritariaRadonAdmin
 
         self.site = AdminSite()
         self.admin = AreaPrioritariaRadonAdmin(Mock(), self.site)

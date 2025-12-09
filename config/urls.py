@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from territorio import views as territorio_views
+from apps.territorio import views as territorio_views
 
 urlpatterns = [
     # API per mappa comuni (richiede login)

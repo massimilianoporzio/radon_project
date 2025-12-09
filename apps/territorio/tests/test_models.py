@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from territorio.models import AreaPrioritariaRadon, ComuneArpa, ComuneCompleto
+from apps.territorio.models import AreaPrioritariaRadon, ComuneArpa, ComuneCompleto
 
 
 class ComuneArpaModelTest(TestCase):
