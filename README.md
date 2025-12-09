@@ -61,7 +61,7 @@ radon_project/
 - **PostGIS 3.3** - Spatial database extension
 - **PostgreSQL 14** - Relational database
 - **Django REST Framework** - API development
-- **Psycopg3** - PostgreSQL driver
+- **psycopg 3** - PostgreSQL driver
 
 ### Frontend
 
@@ -114,7 +114,7 @@ radon_project/
    # Edit .env with your settings
    ```
 
-4. **Setup database**
+4. **Set up database**
 
    ```bash
    uv run python manage.py migrate
