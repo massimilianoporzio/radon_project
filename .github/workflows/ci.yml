@@ -118,4 +118,4 @@ jobs:
         run: uv sync --group dev
 
       - name: Check Markdown formatting
-        run: uv run mdformat --check .
+        run: uv run mdformat --check --exclude .venv .
