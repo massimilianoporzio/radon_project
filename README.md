@@ -173,12 +173,6 @@ uv run ruff format .
 uv run pip-audit
 ```
 
-## API Documentation
-
-Once the server is running, access:
-
-- **Swagger UI**: `http://localhost:8000/api/docs/`
-- **ReDoc**: `http://localhost:8000/api/redoc/`
 
 ## Documentation
 
