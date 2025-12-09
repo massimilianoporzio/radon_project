@@ -5,6 +5,8 @@ __pycache__/
 
 # Environment variables (MAI committare le password)
 .env
+# Consenti .env.example per la documentazione
+!.env.example
 .env.*
 
 # UV / Virtualenv
