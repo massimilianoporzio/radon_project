@@ -2,7 +2,7 @@ name: Auto Request Copilot Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [synchronize]  # Only trigger on new pushes to existing PRs, not on PR creation
 
 jobs:
   request-copilot-review:
