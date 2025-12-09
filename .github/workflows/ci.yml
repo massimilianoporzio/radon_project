@@ -81,12 +81,12 @@ jobs:
 
           # Verifica che la vista ComuneCompleto sia stata creata
           uv run python manage.py shell -c "
-          from territorio.models import ComuneCompleto
+          from apps.territorio.models import ComuneCompleto
           count = ComuneCompleto.objects.count()
           print(f'✅ Vista ComuneCompleto creata (records: {count})')
           "
 
-          uv run pytest --cov=territorio --cov=users --cov-report=term-missing --cov-report=html
+          uv run pytest apps/ --cov=apps --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
 
       # UPLOAD COVERAGE REPORT
       - name: Upload Coverage Report
@@ -96,3 +96,16 @@ jobs:
           name: coverage-report
           path: htmlcov/
           retention-days: 30
+
+      # UPLOAD COVERAGE TO CODECOV
+      - name: Upload Coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
