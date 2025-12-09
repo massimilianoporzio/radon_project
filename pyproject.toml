@@ -19,6 +19,7 @@ dependencies = [
     "gdal ; sys_platform == 'win32'",
     "markdown>=3.10",
     "psycopg>=3.2.13",
+    "urllib3>=2.6.0",  # Security fix for GHSA-gm62-xv2j-4w53 and GHSA-2xpw-w6gg-jr37
     "waitress>=3.0.2",
     "whitenoise>=6.11.0",
 ]
