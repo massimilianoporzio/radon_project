@@ -33,6 +33,7 @@ Review all pull requests automatically on every push.
    - Review error handling
 
 5. **Git & Refactoring**
+
    - Ensure migration consistency
    - Validate import path updates during refactoring
    - Check for breaking changes

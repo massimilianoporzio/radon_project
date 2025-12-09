@@ -44,7 +44,7 @@ Il popup sulla mappa ora mostra:
 
 - ✅ **Nome e Provincia** del comune
 - ✅ **Concentrazione Media Radon** con badge colorato:
-  - 🟢 Verde: < 200 Bq/m³
+  - 🟢 Verde: \< 200 Bq/m³
   - 🟠 Arancione: 200-300 Bq/m³
   - 🔴 Rosso: > 300 Bq/m³
 - ✅ **Area Prioritaria** (Sì/No) con evidenziazione
@@ -177,7 +177,7 @@ class FagliaGeologica(models.Model):
 
 ### Performance
 
-- ✅ Query con LEFT JOIN è veloce (< 3 secondi per 1502 comuni)
+- ✅ Query con LEFT JOIN è veloce (\< 3 secondi per 1502 comuni)
 - ✅ Semplificazione geometrie con PostGIS (`ST_Simplify`)
 - ⚠️ Per dati geologici serve strategia di caching o lazy loading
 
@@ -222,6 +222,6 @@ Il tooltip ora mostra:
 - ✅ `territorio/admin.py` - Admin migliorata
 - ✅ `templates/admin/territorio/comunearpa/change_list.html` - Tooltip interattivo
 
----
+______________________________________________________________________
 
 **Pronto per il prossimo step!** 🚀

@@ -19,6 +19,13 @@ repos:
       # Esegui il formatter (come Black, ma più veloce)
       - id: ruff-format
 
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        args: ["--number"]
+        files: \.(md|MD)$
+
   - repo: https://github.com/pypa/pip-audit
     rev: v2.9.0
     hooks:

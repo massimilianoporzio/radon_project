@@ -6,6 +6,7 @@ A Django-based monitoring application for radon concentration data with GeoDjang
 
 [![Django CI (PostGIS Ready)](https://github.com/massimilianoporzio/radon_project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/massimilianoporzio/radon_project/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/massimilianoporzio/radon_project/branch/main/graph/badge.svg)](https://codecov.io/gh/massimilianoporzio/radon_project)
+[![Markdown Formatting](https://img.shields.io/badge/markdown-mdformat-blue.svg)](https://mdformat.readthedocs.io/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Django 6.0 LTS](https://img.shields.io/badge/django-6.0%20LTS-darkgreen.svg)](https://docs.djangoproject.com/)
 [![PostgreSQL 14](https://img.shields.io/badge/postgresql-14-336791.svg)](https://www.postgresql.org/)
@@ -127,6 +128,7 @@ radon_project/
    ```
 
 6. **Run development server**
+
    ```bash
    uv run python manage.py runserver
    ```
@@ -173,7 +175,6 @@ uv run ruff format .
 uv run pip-audit
 ```
 
-
 ## Documentation
 
 Additional documentation can be found in the `docs/` directory:
@@ -214,6 +215,6 @@ This project is proprietary and confidential.
 
 For issues and questions, please open a GitHub issue or contact the development team.
 
----
+______________________________________________________________________
 
 **Made with ❤️ by the Radon Project Team**

@@ -169,6 +169,6 @@ Se vedi ancora problemi:
 1. CTRL + F5 (Windows) o CMD + SHIFT + R (Mac) - Hard reload
 2. Oppure: DevTools → Tab Application → Storage → Clear site data
 
----
+______________________________________________________________________
 
 **La soluzione dovrebbe funzionare immediatamente dopo il refresh!** 🚀
