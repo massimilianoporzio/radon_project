@@ -78,14 +78,7 @@ jobs:
           DATABASE_URL: postgresql://ci_user:${{ secrets.CI_DB_PASSWORD || 'test_password_for_ci_only_12345' }}@localhost:5432/ci_test_db
         run: |
           uv run python manage.py migrate --noinput
-
-          # Verifica che la vista ComuneCompleto sia stata creata
-          uv run python manage.py shell -c "
-          from apps.territorio.models import ComuneCompleto
-          count = ComuneCompleto.objects.count()
-          print(f'✅ Vista ComuneCompleto creata (records: {count})')
-          "
-
+          uv run python manage.py shell -c "from apps.territorio.models import ComuneCompleto; print(f'✅ Vista ComuneCompleto creata (records: {ComuneCompleto.objects.count()})')"
           uv run pytest apps/ --cov=apps --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
 
       # UPLOAD COVERAGE REPORT
