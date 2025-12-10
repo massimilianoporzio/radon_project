@@ -8,6 +8,7 @@ dependencies = [
     "django>=6.0,<7.0", # Django 6.0.0 LTS with security patches from 5.2.9
     "django-admin-honeypot-updated-2021>=1.2.0",
     "django-concurrency>=2.7",
+    "django-crum==0.7.9",
     "django-environ>=0.12.0",
     "django-filter>=25.2",
     "django-leaflet>=0.30.1",

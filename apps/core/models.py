@@ -1,4 +1,6 @@
 from concurrency.fields import IntegerVersionField
+from crum import get_current_user
+from django.conf import settings
 from django.db import models
 
 
@@ -54,6 +56,26 @@ class TraceableModel(models.Model):
         help_text="Data e ora dell'ultimo aggiornamento",
     )
 
+    # User tracking
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_created",
+        null=True,
+        blank=True,
+        editable=False,
+        help_text="Utente che ha creato il record",
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_updated",
+        null=True,
+        blank=True,
+        editable=False,
+        help_text="Utente che ha ultimo aggiornato il record",
+    )
+
     # Concurrency control - automatic optimistic locking
     version = IntegerVersionField(
         help_text="Versione del record per il controllo automatico della concorrenza",
@@ -62,3 +84,14 @@ class TraceableModel(models.Model):
     class Meta:
         abstract = True
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        """Override save to automatically populate created_by and updated_by."""
+        current_user = get_current_user()
+        if not self.pk and current_user:
+            # New instance - set created_by
+            self.created_by = current_user
+        if current_user:
+            # Update - always set updated_by
+            self.updated_by = current_user
+        super().save(*args, **kwargs)
