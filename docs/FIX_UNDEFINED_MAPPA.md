@@ -4,7 +4,7 @@
 
 Il problema era causato da:
 
-1. **Cache vecchia** in sessionStorage con struttura dati obsoleta
+1. **Cache vecchia** in sessionStorage con struttura dati obsoleta!
 2. **Mancanza di validazione** dei dati nel JavaScript
 
 ## ✅ Soluzioni Implementate
