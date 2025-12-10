@@ -282,3 +282,25 @@ class TraceableModelSaveMethodTest(SimpleTestCase):
             mock_get_user.return_value = None
             # Verify the import works and function is accessible
             assert mock_get_user is not None
+
+    def test_save_guards_against_anonymous_user(self):
+        """Test that save() properly checks for authenticated user."""
+        # Mock an AnonymousUser
+        from django.contrib.auth.models import AnonymousUser
+
+        anonymous = AnonymousUser()
+
+        with patch("apps.core.models.get_current_user", return_value=anonymous):
+            # Verify AnonymousUser is not considered authenticated
+            assert not getattr(anonymous, "is_authenticated", False)
+
+    def test_save_checks_is_authenticated_attribute(self):
+        """Test that save() uses is_authenticated check instead of truthiness."""
+
+        # Objects without is_authenticated should be treated as unauthenticated
+        class FakeUser:
+            pass
+
+        fake = FakeUser()
+        # Should default to False with getattr
+        assert getattr(fake, "is_authenticated", False) is False

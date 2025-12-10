@@ -86,12 +86,16 @@ class TraceableModel(models.Model):
         ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
-        """Override save to automatically populate created_by and updated_by."""
+        """Override save to automatically populate created_by and updated_by.
+
+        Only sets user fields if the current user is authenticated.
+        AnonymousUser or missing request context results in null values.
+        """
         current_user = get_current_user()
-        if not self.pk and current_user:
-            # New instance - set created_by
-            self.created_by = current_user
-        if current_user:
-            # Update - always set updated_by
+        if getattr(current_user, "is_authenticated", False):
+            if not self.pk and not self.created_by:
+                # New instance - set created_by only if not already set
+                self.created_by = current_user
+            # Always update the updated_by field on save
             self.updated_by = current_user
         super().save(*args, **kwargs)
