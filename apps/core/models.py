@@ -1,4 +1,3 @@
-from concurrency.fields import VersionField
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -15,8 +14,8 @@ class TraceableModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text="Data e ora di creazione")
     updated_at = models.DateTimeField(auto_now=True, help_text="Data e ora dell'ultimo aggiornamento")
 
-    # Concurrency control
-    version = VersionField(help_text="Versione del record per il controllo della concorrenza")
+    # Concurrency control (IntegerField per tracciare le versioni)
+    version = models.IntegerField(default=0, help_text="Versione del record per il controllo della concorrenza")
 
     # History tracking
     history = HistoricalRecords()
