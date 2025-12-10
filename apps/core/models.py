@@ -1,3 +1,4 @@
+from concurrency.fields import IntegerVersionField
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -24,12 +25,9 @@ class TraceableModel(models.Model):
         help_text="Data e ora dell'ultimo aggiornamento",
     )
 
-    # Concurrency control (manual versioning - increment on each save)
-    # Note: django-concurrency's VersionField had compatibility issues,
-    # so we use IntegerField and must manually increment on updates
-    version = models.IntegerField(
-        default=0,
-        help_text="Versione del record per il controllo manuale della concorrenza",
+    # Concurrency control - automatic optimistic locking
+    version = IntegerVersionField(
+        help_text="Versione del record per il controllo automatico della concorrenza",
     )
 
     # History tracking
