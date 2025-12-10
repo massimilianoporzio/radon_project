@@ -13,6 +13,7 @@ dependencies = [
     "django-filter>=25.2",
     "django-leaflet>=0.30.1",
     "django-location-field>=2.7.3",
+    "django-optimistic-lock>=1.0.0",
     "django-simple-history>=3.10.1",
     "django-unfold>=0.72.0",
     "djangorestframework>=3.16.1",
