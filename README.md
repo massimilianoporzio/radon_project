@@ -102,10 +102,22 @@ radon_project/
    cd radon_project
    ```
 
-1. **Install dependencies with uv**
+1. **Quick setup with justfile** (recommended)
+
+   Install [just](https://github.com/casey/just) and run:
+
+   ```bash
+   just setup
+   ```
+
+   This will sync dependencies, install pre-commit hooks, and run migrations.
+
+1. **Manual setup**
 
    ```bash
    uv sync --all-extras --dev
+   uv run pre-commit install
+   uv run python manage.py migrate
    ```
 
 1. **Configure environment**
@@ -134,6 +146,44 @@ radon_project/
    ```
 
 Visit `http://localhost:8000/` to access the application.
+
+## Justfile Commands
+
+This project uses [just](https://github.com/casey/just) for task automation. Install it from the official repository.
+
+### Common Commands
+
+```bash
+# Show all available commands
+just
+
+# Run tests with coverage
+just test
+
+# Format code (Python + Markdown)
+just format
+just format-docs
+
+# Run linting
+just lint
+just lint-fix
+
+# Start development server
+just run
+
+# Database operations
+just migrate
+just makemigrations
+just createsuperuser
+
+# Complete workflow before push
+just pre-push
+
+# Setup project from scratch
+just setup
+```
+
+For the full list of commands, run `just` or `just --list`.
 
 ## Testing
 
