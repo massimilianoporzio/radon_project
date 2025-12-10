@@ -261,7 +261,19 @@ class TraceableModelUserTrackingTest(SimpleTestCase):
 
 
 class TraceableModelSaveMethodTest(SimpleTestCase):
-    """Test the save method that automatically populates user tracking fields."""
+    """Test the save method that automatically populates user tracking fields.
+
+    Note: These tests verify the method structure and mocking behavior.
+    Full integration tests with database persistence will be added when concrete
+    models inherit from TraceableModel, as creating test tables for dynamically
+    defined models requires migrations which are not available in test environment.
+
+    Future integration tests should verify:
+    - created_by and updated_by are set on create with authenticated user
+    - only updated_by changes on update
+    - both fields remain None without authenticated user
+    - behavior with update_fields parameter
+    """
 
     def test_save_method_calls_parent_save(self):
         """Test that save() method properly calls parent save method."""
