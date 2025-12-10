@@ -102,32 +102,32 @@ radon_project/
    cd radon_project
    ```
 
-2. **Install dependencies with uv**
+1. **Install dependencies with uv**
 
    ```bash
    uv sync --all-extras --dev
    ```
 
-3. **Configure environment**
+1. **Configure environment**
 
    ```bash
    cp .env.example .env
    # Edit .env with your settings
    ```
 
-4. **Set up database**
+1. **Set up database**
 
    ```bash
    uv run python manage.py migrate
    ```
 
-5. **Create superuser**
+1. **Create superuser**
 
    ```bash
    uv run python manage.py createsuperuser
    ```
 
-6. **Run development server**
+1. **Run development server**
 
    ```bash
    uv run python manage.py runserver
@@ -186,10 +186,10 @@ Additional documentation can be found in the `docs/` directory:
 ## Contributing
 
 1. Create a feature branch: `git checkout -b feature/your-feature`
-2. Make your changes and ensure tests pass
-3. Commit with clear messages: `git commit -am 'feat: add new feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+1. Make your changes and ensure tests pass
+1. Commit with clear messages: `git commit -am 'feat: add new feature'`
+1. Push to the branch: `git push origin feature/your-feature`
+1. Open a Pull Request
 
 ### Pre-commit hooks
 

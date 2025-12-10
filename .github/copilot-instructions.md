@@ -12,27 +12,27 @@ Review all pull requests automatically on every push.
    - Validate model structure and migrations
    - Ensure settings are properly configured
 
-2. **Testing Requirements**
+1. **Testing Requirements**
 
    - Verify test coverage is >= 75%
    - Check pytest assertions are comprehensive
    - Validate GeoDjango spatial data handling
 
-3. **Security**
+1. **Security**
 
    - Check for SQL injection vulnerabilities
    - Validate input handling
    - Review authentication/authorization code
    - Ensure no hardcoded secrets
 
-4. **Python Code Quality**
+1. **Python Code Quality**
 
    - Follow PEP 8 standards
    - Check for unused imports
    - Validate type hints where applicable
    - Review error handling
 
-5. **Git & Refactoring**
+1. **Git & Refactoring**
 
    - Ensure migration consistency
    - Validate import path updates during refactoring

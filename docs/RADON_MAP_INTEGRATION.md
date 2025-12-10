@@ -114,8 +114,8 @@ GET /api/comuni/001001/dettaglio/
 **Quando chiamarla:**
 
 1. Click sul comune nella mappa → Sidebar con dettagli completi
-2. Dashboard utente → Vista scheda comune
-3. Report → Generazione PDF/Excel
+1. Dashboard utente → Vista scheda comune
+1. Report → Generazione PDF/Excel
 
 ### Opzione B: **Tutto nel Tooltip**
 
@@ -211,9 +211,9 @@ Il tooltip ora mostra:
 ## ❓ Domande per Te
 
 1. **Dashboard finale**: Vuoi prioritizzare la dashboard per gli utenti o prima completare le API?
-2. **Dati geologici**: Ti interessa mostrarli sulla mappa (es. layer faglie) o solo nei dettagli?
-3. **Permessi**: Chi deve poter vedere quali dati? (Admin vs utenti normali)
-4. **Export**: Serve generare report PDF/Excel automatici?
+1. **Dati geologici**: Ti interessa mostrarli sulla mappa (es. layer faglie) o solo nei dettagli?
+1. **Permessi**: Chi deve poter vedere quali dati? (Admin vs utenti normali)
+1. **Export**: Serve generare report PDF/Excel automatici?
 
 ## 📦 File Modificati
 
