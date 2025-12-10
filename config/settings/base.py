@@ -70,7 +70,6 @@ LOCAL_APPS = [
     "apps.core",
     "apps.users",
     "apps.territorio",
-    "apps.edifici",
 ]
 
 # La concatenazione finale è corretta:
