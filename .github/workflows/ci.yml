@@ -102,3 +102,20 @@ jobs:
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  mdformat-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Check Markdown formatting
+        run: uv run mdformat --check $(find . -name "*.md" -not -path "./.venv/*" -not -path "./staticfiles/*" -not -path "./.git/*")

@@ -4,8 +4,8 @@
 
 Il problema era causato da:
 
-1. **Cache vecchia** in sessionStorage con struttura dati obsoleta
-2. **Mancanza di validazione** dei dati nel JavaScript
+1. **Cache vecchia** in sessionStorage con struttura dati obsoleta!
+1. **Mancanza di validazione** dei dati nel JavaScript
 
 ## ✅ Soluzioni Implementate
 
@@ -116,11 +116,11 @@ Chiavi disponibili: ["codice_istat", "nome", "provincia", "media_radon", "area_p
 Dopo aver ricaricato la pagina con cache pulita:
 
 1. ✅ Nomi comuni visibili (non "undefined")
-2. ✅ Province visibili
-3. ✅ Media radon con colori (verde/arancione/rosso)
-4. ✅ Area prioritaria classificata
-5. ✅ Link "📊 Visualizza dettagli completi →" cliccabile
-6. ✅ Codice ISTAT visibile
+1. ✅ Province visibili
+1. ✅ Media radon con colori (verde/arancione/rosso)
+1. ✅ Area prioritaria classificata
+1. ✅ Link "📊 Visualizza dettagli completi →" cliccabile
+1. ✅ Codice ISTAT visibile
 
 ## 🐛 Se Persiste il Problema
 
@@ -136,10 +136,10 @@ Output atteso: ✅ 1502 comuni con tutte le properties
 ### Verifica nel Browser
 
 1. Apri DevTools (F12)
-2. Tab **Network**
-3. Filtra per "comuni-geojson"
-4. Clicca sulla richiesta
-5. Tab **Response** → Verifica JSON
+1. Tab **Network**
+1. Filtra per "comuni-geojson"
+1. Clicca sulla richiesta
+1. Tab **Response** → Verifica JSON
 
 Deve contenere:
 
@@ -167,8 +167,8 @@ Deve contenere:
 Se vedi ancora problemi:
 
 1. CTRL + F5 (Windows) o CMD + SHIFT + R (Mac) - Hard reload
-2. Oppure: DevTools → Tab Application → Storage → Clear site data
+1. Oppure: DevTools → Tab Application → Storage → Clear site data
 
----
+______________________________________________________________________
 
 **La soluzione dovrebbe funzionare immediatamente dopo il refresh!** 🚀

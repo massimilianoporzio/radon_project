@@ -20,7 +20,7 @@
 
 - **Moransengo-Tonengo** (Asti): ❌ NO media radon | ❌ NO area prioritaria
 
----
+______________________________________________________________________
 
 ## ✅ Come Vengono Gestiti i Dati Mancanti
 
@@ -166,7 +166,7 @@ class DatiMissingFilter(admin.SimpleListFilter):
 - ✅ Colonna "Radon Medio" → `N/D` in grigio se mancante
 - ✅ Indicatori visivi → Colori basati sul livello di rischio
 
----
+______________________________________________________________________
 
 ## 🎨 Design Pattern di Visualizzazione
 
@@ -194,7 +194,7 @@ Aree non prioritarie → #10b981 (verde)
 N/D → #9ca3af (grigio)
 ```
 
----
+______________________________________________________________________
 
 ## 🔧 Estensione Futura per Altri Dati Geologici
 
@@ -233,7 +233,7 @@ if (props.geologia && props.geologia !== "N/D") {
 }
 ```
 
----
+______________________________________________________________________
 
 ## 📋 Checklist Pre-Deploy
 
@@ -247,7 +247,7 @@ Prima di mettere in produzione, verifica:
 - [ ] ✅ Messaggio utente chiaro: "Dato non disponibile" (non errori criptici)
 - [ ] ✅ Log dei comuni con dati mancanti per successive integrazioni
 
----
+______________________________________________________________________
 
 ## 🐛 Troubleshooting
 
@@ -266,7 +266,7 @@ Prima di mettere in produzione, verifica:
 **Causa:** Frontend non controlla `!== null` prima di usare il dato
 **Soluzione:** Aggiungi sempre controllo: `if (props.campo !== null && props.campo !== 'N/D')`
 
----
+______________________________________________________________________
 
 ## 📈 Monitoraggio Dati Mancanti
 
@@ -297,6 +297,6 @@ comuni_incompleti = ComuneArpa.objects.filter(media_radon__isnull=True)
 print(f"⚠️ {comuni_incompleti.count()} comuni senza media radon")
 ```
 
----
+______________________________________________________________________
 
 **Conclusione:** La gestione dei dati mancanti è **robusta e fail-safe** a tutti i livelli dello stack. Il sistema degrada gracefully mostrando "N/D" invece di generare errori. ✅

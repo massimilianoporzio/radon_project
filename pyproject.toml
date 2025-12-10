@@ -34,6 +34,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "pytest-django>=4.11.1",
     "ruff>=0.14.6",
+    "mdformat>=0.7.17",
 ]
 
 [tool.ruff]
@@ -85,6 +86,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.mdformat]
+wrap = "no"
 
 [tool.uv.sources]
 gdal = { url = "https://github.com/massimilianoporzio/radon_project/releases/download/libs-v1/gdal-3.11.4-cp312-cp312-win_amd64.whl", marker = "sys_platform == 'win32'" }

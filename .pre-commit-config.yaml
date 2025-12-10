@@ -19,6 +19,14 @@ repos:
       # Esegui il formatter (come Black, ma più veloce)
       - id: ruff-format
 
+  # mdformat disabled in pre-commit to avoid oscillation issues
+  # Run manually: uv run mdformat <files>
+  # - repo: https://github.com/executablebooks/mdformat
+  #   rev: 0.7.17
+  #   hooks:
+  #     - id: mdformat
+  #       files: \.(md|MD)$
+
   - repo: https://github.com/pypa/pip-audit
     rev: v2.9.0
     hooks:

@@ -109,10 +109,10 @@ Template dedicato che:
 ### Nella pagina di dettaglio del comune:
 
 1. **Mappa interattiva** con il confine del comune evidenziato (blu con bordo scuro)
-2. **Auto-zoom automatico** sui confini (maxZoom: 11 per evitare zoom eccessivo)
-3. **Popup informativo** con nome, provincia e codice ISTAT
-4. **Layer OpenStreetMap** come base
-5. **Integrazione perfetta** con Unfold admin (nessun template override necessario)
+1. **Auto-zoom automatico** sui confini (maxZoom: 11 per evitare zoom eccessivo)
+1. **Popup informativo** con nome, provincia e codice ISTAT
+1. **Layer OpenStreetMap** come base
+1. **Integrazione perfetta** con Unfold admin (nessun template override necessario)
 
 ## Personalizzazioni possibili
 
@@ -153,21 +153,21 @@ Modifica la sezione `bindPopup` nel template per cambiare contenuto o stile.
 
 1. **Approccio readonly field**: Usa `readonly_fields` con metodo personalizzato invece di widget form, garantendo compatibilità con `has_change_permission=False`
 
-2. **Read-only**: L'admin è configurata in sola lettura (`has_change_permission=False`), mostra solo il pulsante CHIUDI
+1. **Read-only**: L'admin è configurata in sola lettura (`has_change_permission=False`), mostra solo il pulsante CHIUDI
 
-3. **Template standalone**: La mappa è completamente indipendente, carica Leaflet autonomamente senza dipendenze dai widget form di django-leaflet
+1. **Template standalone**: La mappa è completamente indipendente, carica Leaflet autonomamente senza dipendenze dai widget form di django-leaflet
 
-4. **SRID**: Il campo `geom` usa SRID 4326 (WGS84) - standard per coordinate lat/lon
+1. **SRID**: Il campo `geom` usa SRID 4326 (WGS84) - standard per coordinate lat/lon
 
-5. **Performance**: Ogni comune ha la sua mappa standalone - ottimale per visualizzazione singola
+1. **Performance**: Ogni comune ha la sua mappa standalone - ottimale per visualizzazione singola
 
 ## File modificati/creati
 
 1. ✅ `pyproject.toml` - Aggiunto `django-leaflet>=0.30.1`
-2. ✅ `config/settings/base.py` - Configurazione `LEAFLET_CONFIG` e app in `INSTALLED_APPS`
-3. ✅ `territorio/admin.py` - Classe `UnfoldLeafletGeoAdmin` e metodo `mappa_confini()`
-4. ✅ `templates/territorio/widgets/readonly_leaflet_widget.html` - Template mappa standalone
-5. ✅ `territorio/widgets.py` - (Opzionale, non più usato nella soluzione finale)
+1. ✅ `config/settings/base.py` - Configurazione `LEAFLET_CONFIG` e app in `INSTALLED_APPS`
+1. ✅ `territorio/admin.py` - Classe `UnfoldLeafletGeoAdmin` e metodo `mappa_confini()`
+1. ✅ `templates/territorio/widgets/readonly_leaflet_widget.html` - Template mappa standalone
+1. ✅ `territorio/widgets.py` - (Opzionale, non più usato nella soluzione finale)
 
 ## Architettura della soluzione
 
@@ -188,7 +188,7 @@ Admin View (territorio/admin.py)
 ## Possibili estensioni future
 
 1. **Heatmap misurazioni radon**: Sovrapponi layer con dati misurazioni
-2. **Layer aggiuntivi**: Aggiungi confini regionali, provinciali, ecc.
-3. **Clustering**: Per vista lista con molti comuni
-4. **Export mappa**: Bottone per esportare la mappa come immagine
-5. **Legenda personalizzata**: Aggiungi legenda per colori/simboli
+1. **Layer aggiuntivi**: Aggiungi confini regionali, provinciali, ecc.
+1. **Clustering**: Per vista lista con molti comuni
+1. **Export mappa**: Bottone per esportare la mappa come immagine
+1. **Legenda personalizzata**: Aggiungi legenda per colori/simboli
