@@ -11,11 +11,26 @@ class TraceableModel(models.Model):
     """
 
     # Timestamp fields
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Data e ora di creazione")
-    updated_at = models.DateTimeField(auto_now=True, help_text="Data e ora dell'ultimo aggiornamento")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
+        db_index=True,
+        help_text="Data e ora di creazione",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        editable=False,
+        db_index=True,
+        help_text="Data e ora dell'ultimo aggiornamento",
+    )
 
-    # Concurrency control (IntegerField per tracciare le versioni)
-    version = models.IntegerField(default=0, help_text="Versione del record per il controllo della concorrenza")
+    # Concurrency control (manual versioning - increment on each save)
+    # Note: django-concurrency's VersionField had compatibility issues,
+    # so we use IntegerField and must manually increment on updates
+    version = models.IntegerField(
+        default=0,
+        help_text="Versione del record per il controllo manuale della concorrenza",
+    )
 
     # History tracking
     history = HistoricalRecords()
