@@ -34,10 +34,14 @@ class TraceableModel(models.Model):
     Attributi:
         created_at: Timestamp di creazione (auto-popolato, non modificabile)
         updated_at: Timestamp dell'ultimo aggiornamento (auto-aggiornato)
+        created_by: Utente che ha creato il record (auto-popolato via middleware)
+        updated_by: Utente che ha ultimo aggiornato il record (auto-popolato)
         version: Campo per il controllo di concorrenza ottimistico (django-concurrency)
 
     Note:
         - created_at e updated_at sono gestiti automaticamente da Django
+        - created_by e updated_by sono popolati automaticamente tramite django-crum
+        - I campi utente rimangono null per richieste anonime o management commands
         - version previene modifiche concorrenti usando optimistic locking
         - L'ordering predefinito è per created_at discendente (più recenti prima)
     """
