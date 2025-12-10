@@ -68,6 +68,7 @@ class TraceableModel(models.Model):
         null=True,
         blank=True,
         editable=False,
+        db_index=True,
         help_text="Utente che ha creato il record",
     )
     updated_by = models.ForeignKey(
@@ -77,7 +78,8 @@ class TraceableModel(models.Model):
         null=True,
         blank=True,
         editable=False,
-        help_text="Utente che ha ultimo aggiornato il record",
+        db_index=True,
+        help_text="Utente che ha aggiornato il record",
     )
 
     # Concurrency control - automatic optimistic locking
