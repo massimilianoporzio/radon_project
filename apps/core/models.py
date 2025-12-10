@@ -83,6 +83,7 @@ class TraceableModel(VersionedMixin, models.Model):
     )
 
     # Concurrency control - automatic optimistic locking
+    # VersionedMixin does NOT declare the 'version' field, so we add it here explicitly.
     version = VersionField(help_text="Campo per controllo concorrenza ottimistica")
 
     class Meta:
