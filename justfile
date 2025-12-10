@@ -49,8 +49,13 @@ check-docs:
     @echo "🔍 Verifica formattazione markdown..."
     @uv run mdformat --check .github/copilot-instructions.md README.md docs/*.md
 
-# Esegui tutti i controlli di qualità
-quality: lint format format-docs
+# Correggi tutti i problemi di qualità (modifica i file)
+fix-quality: lint format format-docs
+
+# Esegui tutti i controlli di qualità senza modificare
+quality: lint
+    uv run ruff format --check .
+    @uv run mdformat --check .github/copilot-instructions.md README.md docs/*.md
     @echo "✅ Tutti i controlli di qualità completati!"
 
 # 🔒 Security
@@ -91,8 +96,8 @@ collectstatic:
 
 # Pulisci file cache Python
 clean-pyc:
-    find . -type f -name "*.pyc" -delete
-    find . -type d -name "__pycache__" -delete
+    find . \( -name .git -o -name .venv -o -name .tox -o -name htmlcov \) -prune -false -o -type f -name "*.pyc" -delete
+    find . \( -name .git -o -name .venv -o -name .tox -o -name htmlcov \) -prune -false -o -type d -name "__pycache__" -delete
 
 # Pulisci coverage reports
 clean-cov:
@@ -124,16 +129,26 @@ pre-commit-all:
 
 # 🚢 CI/CD Simulation
 
+# Controlla la formattazione del codice (come in CI)
+format-check:
+    uv run ruff format --check .
+
 # Simula la CI pipeline localmente
-ci: lint test audit check-docs
+ci: lint test audit check-docs format-check
     @echo "✅ CI simulation completata con successo!"
 
 # 📊 Coverage
 
 # Apri il report di coverage nel browser
-coverage-report:
-    @echo "📊 Apertura report coverage..."
-    @start htmlcov/index.html
+coverage-report: test
+	@echo "📊 Apertura report coverage..."
+	@if command -v xdg-open > /dev/null; then \
+		xdg-open htmlcov/index.html; \
+	elif command -v open > /dev/null; then \
+		open htmlcov/index.html; \
+	else \
+		python -m webbrowser htmlcov/index.html; \
+	fi
 
 # 🎯 Workflow comuni
 
@@ -141,7 +156,7 @@ coverage-report:
 pre-push: quality test
     @echo "✅ Pronto per il push!"
 
-# Setup completo del progetto
+# Set up completo del progetto
 setup: sync install-hooks migrate
     @echo "✅ Setup completato!"
     @echo "💡 Crea un superuser con: just createsuperuser"
