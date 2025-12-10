@@ -239,13 +239,13 @@ ______________________________________________________________________
 
 Prima di mettere in produzione, verifica:
 
-- \[ \] ✅ LEFT JOIN usato per tutte le tabelle opzionali
-- \[ \] ✅ Backend gestisce `NULL` → converte in `None` o `"N/D"`
-- \[ \] ✅ Frontend verifica `!== null` e `!== 'N/D'`
-- \[ \] ✅ Stile visivo consistente per dati mancanti (grigio + corsivo)
-- \[ \] ✅ Filtri admin per trovare comuni con dati incompleti
-- \[ \] ✅ Messaggio utente chiaro: "Dato non disponibile" (non errori criptici)
-- \[ \] ✅ Log dei comuni con dati mancanti per successive integrazioni
+- [ ] ✅ LEFT JOIN usato per tutte le tabelle opzionali
+- [ ] ✅ Backend gestisce `NULL` → converte in `None` o `"N/D"`
+- [ ] ✅ Frontend verifica `!== null` e `!== 'N/D'`
+- [ ] ✅ Stile visivo consistente per dati mancanti (grigio + corsivo)
+- [ ] ✅ Filtri admin per trovare comuni con dati incompleti
+- [ ] ✅ Messaggio utente chiaro: "Dato non disponibile" (non errori criptici)
+- [ ] ✅ Log dei comuni con dati mancanti per successive integrazioni
 
 ______________________________________________________________________
 
