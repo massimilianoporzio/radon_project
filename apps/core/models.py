@@ -1,4 +1,6 @@
 from concurrency.fields import IntegerVersionField
+from crum import get_current_user
+from django.conf import settings
 from django.db import models
 
 
@@ -32,10 +34,14 @@ class TraceableModel(models.Model):
     Attributi:
         created_at: Timestamp di creazione (auto-popolato, non modificabile)
         updated_at: Timestamp dell'ultimo aggiornamento (auto-aggiornato)
+        created_by: Utente che ha creato il record (auto-popolato via middleware)
+        updated_by: Utente che ha ultimo aggiornato il record (auto-popolato)
         version: Campo per il controllo di concorrenza ottimistico (django-concurrency)
 
     Note:
         - created_at e updated_at sono gestiti automaticamente da Django
+        - created_by e updated_by sono popolati automaticamente tramite django-crum
+        - I campi utente rimangono null per richieste anonime o management commands
         - version previene modifiche concorrenti usando optimistic locking
         - L'ordering predefinito è per created_at discendente (più recenti prima)
     """
@@ -54,6 +60,28 @@ class TraceableModel(models.Model):
         help_text="Data e ora dell'ultimo aggiornamento",
     )
 
+    # User tracking
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_created",
+        null=True,
+        blank=True,
+        editable=False,
+        db_index=True,
+        help_text="Utente che ha creato il record",
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_updated",
+        null=True,
+        blank=True,
+        editable=False,
+        db_index=True,
+        help_text="Utente che ha aggiornato il record",
+    )
+
     # Concurrency control - automatic optimistic locking
     version = IntegerVersionField(
         help_text="Versione del record per il controllo automatico della concorrenza",
@@ -62,3 +90,18 @@ class TraceableModel(models.Model):
     class Meta:
         abstract = True
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        """Override save to automatically populate created_by and updated_by.
+
+        Only sets user fields if the current user is authenticated.
+        AnonymousUser or missing request context results in null values.
+        """
+        current_user = get_current_user()
+        if getattr(current_user, "is_authenticated", False):
+            if not self.pk and not self.created_by:
+                # New instance - set created_by only if not already set
+                self.created_by = current_user
+            # Always update the updated_by field on save
+            self.updated_by = current_user
+        super().save(*args, **kwargs)
