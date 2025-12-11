@@ -62,7 +62,6 @@ THIRD_PARTY_APPS = [
     "location_field.apps.DefaultConfig",
     "leaflet",
     "simple_history",
-    "concurrency",
     "drf_yasg",
 ]
 

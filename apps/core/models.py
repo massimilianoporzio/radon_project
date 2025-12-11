@@ -1,10 +1,10 @@
-from concurrency.fields import IntegerVersionField
 from crum import get_current_user
 from django.conf import settings
 from django.db import models
+from ool import VersionedMixin, VersionField
 
 
-class TraceableModel(models.Model):
+class TraceableModel(VersionedMixin, models.Model):
     """
     Modello astratto che fornisce tracciamento automatico di creazione,
     aggiornamento e gestione della concorrenza ottimistica.
@@ -83,9 +83,8 @@ class TraceableModel(models.Model):
     )
 
     # Concurrency control - automatic optimistic locking
-    version = IntegerVersionField(
-        help_text="Versione del record per il controllo automatico della concorrenza",
-    )
+    # VersionedMixin does NOT declare the 'version' field, so we add it here explicitly.
+    version = VersionField(help_text="Campo per controllo concorrenza ottimistica")
 
     class Meta:
         abstract = True
